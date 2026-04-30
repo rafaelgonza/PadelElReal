@@ -142,6 +142,15 @@
     .slot-taken:hover{background:var(--g200)}
     .slot-taken-addr{font-size:.72rem;font-weight:400;color:var(--g400);max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
     .slot-past{background:var(--g50);color:#d1d5db;cursor:default}
+    /* Light indicator */
+    .light-badge{display:inline-flex;align-items:center;gap:.25rem;font-size:.68rem;font-weight:700;
+      padding:.15rem .45rem;border-radius:100px;margin-top:.25rem;white-space:nowrap}
+    .light-needed{background:linear-gradient(135deg,#1e1b4b,#312e81);color:#c7d2fe}
+    .light-dusk{background:linear-gradient(135deg,#7c2d12,#c2410c);color:#fed7aa}
+    .time-cell-inner{display:flex;flex-direction:column;gap:.1rem}
+    /* Row tint for night slots */
+    tr.needs-light td{background:rgba(49,46,129,.03)}
+    tr.needs-light .time-cell{background:rgba(49,46,129,.07)!important}
     .slot-locked{background:var(--amber-l);color:#92400e;cursor:default;font-size:.78rem}
 
     /* MODALS */
@@ -224,6 +233,9 @@
     .btn-edit-cancel{padding:.5rem .875rem;border:2px solid var(--g200);border-radius:8px;background:white;
       font-size:.82rem;font-weight:600;color:var(--g600);transition:all .2s}
     .btn-edit-cancel:hover{border-color:var(--g400)}
+    .btn-edit-delete{padding:.5rem .875rem;border:none;border-radius:8px;background:var(--red-l);
+      font-size:.82rem;font-weight:600;color:var(--red);transition:all .2s;margin-left:auto}
+    .btn-edit-delete:hover{background:var(--red);color:white}
     .edit-err{font-size:.78rem;color:var(--red);margin-top:.375rem;min-height:1em}
     .user-row{display:flex;align-items:center;gap:.75rem;padding:.75rem 1rem;background:var(--g50);
       border-radius:var(--r);border:1.5px solid var(--g200)}
@@ -724,12 +736,25 @@ function renderGrid(date, today, nowMin) {
   userSlots.forEach(i => { blockedIdxs.add(i-1); blockedIdxs.add(i); blockedIdxs.add(i+1); });
 
   const isToday = date === today;
+  const sun = getSunTimes(date);  // sunrise/sunset in minutes from midnight
 
   S.slots.forEach(slot => {
+    const slotStartMin = toMin(slot.start);
+    const slotEndMin   = toMin(slot.end);
+    const lightInfo    = getLightInfo(slotStartMin, slotEndMin, sun);
+
     const tr = document.createElement('tr');
+    if (lightInfo.needsLight) tr.classList.add('needs-light');
+
     const tdT = document.createElement('td');
     tdT.className='time-cell';
-    tdT.innerHTML=`<span class="time-main">${slot.start}</span><span class="time-end">hasta ${slot.end}</span>`;
+    let lightBadge = '';
+    if (lightInfo.isDusk) {
+      lightBadge = `<span class="light-badge light-dusk">🌅 Atardecer</span>`;
+    } else if (lightInfo.needsLight) {
+      lightBadge = `<span class="light-badge light-needed">💡 Luz artif.</span>`;
+    }
+    tdT.innerHTML=`<div class="time-cell-inner"><div><span class="time-main">${slot.start}</span><span class="time-end">hasta ${slot.end}</span></div>${lightBadge}</div>`;
     tr.appendChild(tdT);
 
     const slotMin = toMin(slot.start);
@@ -785,6 +810,74 @@ function mkBtn(cls, html, clickable) {
 }
 function toMin(t) { const [h,m]=t.split(':').map(Number); return h*60+m; }
 function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// ─── SUNRISE / SUNSET (Sevilla 37.3886°N, 5.9823°W) ───────────
+// Cálculo astronómico estándar NOAA, sin API externa
+function getSunTimes(dateStr) {
+  const [y, m, d] = dateStr.split('-').map(Number);
+  const LAT = 37.3886, LON = -5.9823;
+  const toR = x => x * Math.PI / 180;
+
+  // Día juliano
+  const JD = (Date.UTC(y, m-1, d) / 86400000) + 2440587.5;
+  const T  = (JD - 2451545.0) / 36525;
+
+  // Longitud media y anomalía media del Sol
+  const L0 = (280.46646 + T*(36000.76983 + T*0.0003032)) % 360;
+  const M  = (357.52911 + T*(35999.05029 - T*0.0001537)) % 360;
+  const Mr = toR(M);
+
+  // Ecuación del centro
+  const C = (1.914602 - T*(0.004817 + T*0.000014)) * Math.sin(Mr)
+          + (0.019993 - T*0.000101) * Math.sin(2*Mr)
+          + 0.000289 * Math.sin(3*Mr);
+
+  // Longitud aparente
+  const omega  = 125.04 - 1934.136*T;
+  const lambda = toR(L0 + C - 0.00569 - 0.00478*Math.sin(toR(omega)));
+
+  // Declinación solar
+  const dec = Math.asin(Math.sin(toR(23.439291111)) * Math.sin(lambda));
+
+  // Ecuación del tiempo (minutos)
+  const y2   = Math.tan(toR(23.439291111/2)) ** 2;
+  const L0r  = toR(L0);
+  const EqT  = 4 * (180/Math.PI) * (
+    y2*Math.sin(2*L0r) - 2*0.016709*Math.sin(Mr) +
+    4*0.016709*y2*Math.sin(Mr)*Math.cos(2*L0r) -
+    0.5*y2*y2*Math.sin(4*L0r) - 1.25*0.016709*0.016709*Math.sin(2*Mr)
+  );
+
+  // Ángulo horario del amanecer/atardecer (deg)
+  const latR  = toR(LAT);
+  const cosHA = (Math.cos(toR(90.833)) - Math.sin(latR)*Math.sin(dec))
+              / (Math.cos(latR)*Math.cos(dec));
+  if (cosHA < -1 || cosHA > 1) return { sunrise: 0, sunset: 1440 };
+
+  const HA = (180/Math.PI) * Math.acos(cosHA);
+
+  // Mediodía solar y ortos/ocasos en minutos UTC
+  const noon       = 720 - 4*LON - EqT;
+  const sunriseUTC = noon - 4*HA;
+  const sunsetUTC  = noon + 4*HA;
+
+  // Offset local (España: UTC+1 invierno, UTC+2 verano — usamos Date del navegador)
+  const offsetMin = -new Date(y, m-1, d).getTimezoneOffset();
+
+  return {
+    sunrise: Math.round(sunriseUTC + offsetMin),
+    sunset:  Math.round(sunsetUTC  + offsetMin)
+  };
+}
+
+// Determina si un turno necesita luz artificial
+// "atardecer" = el turno empieza hasta 30 min antes del ocaso y acaba después
+function getLightInfo(startMin, endMin, sun) {
+  const DUSK_MARGIN = 30;
+  const needsLight = startMin < sun.sunrise || endMin > sun.sunset;
+  const isDusk     = !needsLight && (sun.sunset - startMin) <= DUSK_MARGIN && endMin > sun.sunset - DUSK_MARGIN;
+  return { needsLight, isDusk };
+}
 
 // ─── MODALS ────────────────────────────────────────────────
 function openReserveModal(courtId, slot, date) {
@@ -977,6 +1070,7 @@ function renderUserList(users) {
         <div class="edit-actions">
           <button class="btn-edit-cancel" onclick="toggleUserEdit(${u.id},null)">Cancelar</button>
           <button class="btn-edit-save" onclick="saveUserEdit(${u.id})">💾 Guardar cambios</button>
+          <button class="btn-edit-delete" onclick="deleteUser(${u.id},'${escHtml(u.name).replace(/'/g,'')}')">🗑 Eliminar</button>
         </div>
       </div>`;
     list.appendChild(wrap);
@@ -1018,6 +1112,15 @@ async function setApproval(id, approved, btn) {
     toast(approved ? '✓ Acceso concedido' : 'Acceso denegado', approved?'success':'');
     loadAdminUsers();
   } catch(e) { toast(e.message,'error'); btn.disabled=false; }
+}
+
+async function deleteUser(id, name) {
+  if (!confirm(`⚠️ ¿Seguro que quieres eliminar al usuario "${name}"?\n\nSe eliminarán también todas sus reservas. Esta acción no se puede deshacer.`)) return;
+  try {
+    await api('DELETE',`/admin/users/${id}`);
+    toast(`Usuario "${name}" eliminado`,'success');
+    loadAdminUsers();
+  } catch(e) { toast(e.message,'error'); }
 }
 
 // ─── ADMIN HISTORY ─────────────────────────────────────────

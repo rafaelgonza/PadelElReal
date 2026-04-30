@@ -315,6 +315,14 @@ app.patch('/api/admin/users/:id', authenticate, adminOnly, (req, res) => {
   }
 });
 
+app.delete('/api/admin/users/:id', authenticate, adminOnly, (req, res) => {
+  const u = db.prepare('SELECT id,is_admin FROM users WHERE id=?').get(req.params.id);
+  if (!u) return res.status(404).json({ error: 'Usuario no encontrado' });
+  if (u.is_admin) return res.status(400).json({ error: 'No se puede eliminar al administrador' });
+  db.prepare('DELETE FROM users WHERE id=?').run(req.params.id);
+  res.json({ message: 'Usuario eliminado' });
+});
+
 // ─── ADMIN: HISTORY ───────────────────────────────────────────────────────────
 app.get('/api/admin/history', authenticate, adminOnly, (req, res) => {
   const rows = db.prepare(`
