@@ -159,6 +159,7 @@ app.get('/api/reservations', authenticate, approvedOnly, (req, res) => {
 });
 
 app.post('/api/reservations', authenticate, approvedOnly, (req, res) => {
+  if (req.user.is_admin) return res.status(403).json({ error: 'El administrador no puede hacer reservas' });
   const { court_id, date, slot_index } = req.body || {};
   if (!getValidDates().includes(date)) return res.status(400).json({ error: 'Fecha no válida' });
   if (![1,2].includes(Number(court_id))) return res.status(400).json({ error: 'Pista no válida' });

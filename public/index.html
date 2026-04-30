@@ -666,6 +666,12 @@ function renderGrid(date, today, nowMin) {
         if (res.user_id === S.user.id) {
           btn = mkBtn('slot-mine',`<span>✓ Tuya</span><span class="slot-mine-sub">Toca para cancelar</span>`,true);
           btn.onclick = () => openCancelModal(res, courtId, slot);
+        } else if (S.user.is_admin) {
+          // Admin puede cancelar cualquier reserva
+          const addr = `C/ ${res.calle} ${res.numero}`;
+          btn = mkBtn('slot-mine',`<span>🗑 ${escHtml(res.user_name)}</span><span class="slot-mine-sub">${escHtml(addr)}</span>`,true);
+          btn.style.background='#fee2e2'; btn.style.color='#b91c1c';
+          btn.onclick = () => openCancelModal(res, courtId, slot);
         } else {
           // Show address (truncated), click for full popup
           const addr = `C/ ${res.calle} ${res.numero}`;
@@ -673,6 +679,9 @@ function renderGrid(date, today, nowMin) {
           btn.title = addr;
           btn.onclick = () => openAddrModal(res, courtId, slot);
         }
+      } else if (S.user.is_admin) {
+        // Admin no puede reservar
+        btn = mkBtn('slot-past','—',false);
       } else if (isBlocked) {
         btn = mkBtn('slot-locked','🔒 No disponible',false);
         btn.title='No puedes reservar turnos adyacentes a los tuyos';
