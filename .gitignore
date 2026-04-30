@@ -1,0 +1,6 @@
+node_modules/
+padel.db
+padel.db-shm
+padel.db-wal
+.env
+*.log
