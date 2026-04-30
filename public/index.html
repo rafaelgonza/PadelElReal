@@ -558,7 +558,7 @@
       </div>
       <table class="history-table">
         <thead><tr>
-          <th>Reservado el</th><th>Fecha pista</th><th>Pista</th><th>Horario</th><th>Nombre</th><th>Calle</th><th>Nº</th>
+          <th>Reservado el</th><th>Fecha pista</th><th>Pista</th><th>Horario</th><th>Nombre</th><th>Calle</th><th>Nº</th><th></th>
         </tr></thead>
         <tbody id="hist-body"></tbody>
       </table>
@@ -1125,7 +1125,7 @@ async function deleteUser(id, name) {
 
 // ─── ADMIN HISTORY ─────────────────────────────────────────
 async function loadHistory() {
-  document.getElementById('hist-body').innerHTML='<tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--g400)"><div class="spinner"></div></td></tr>';
+  document.getElementById('hist-body').innerHTML='<tr><td colspan="8" style="text-align:center;padding:2rem;color:var(--g400)"><div class="spinner"></div></td></tr>';
   try {
     const data = await api('GET','/admin/history');
     S.allHistory = data.reservations.map(r => {
@@ -1142,12 +1142,12 @@ async function loadHistory() {
       return {...r, timeStr:`${f(startMin)}–${f(startMin+90)}`, createdFmt: ca};
     });
     renderHistory(S.allHistory);
-  } catch(e) { document.getElementById('hist-body').innerHTML=`<tr><td colspan="7" style="text-align:center;color:var(--red);padding:1rem">❌ ${e.message}</td></tr>`; }
+  } catch(e) { document.getElementById('hist-body').innerHTML=`<tr><td colspan="8" style="text-align:center;color:var(--red);padding:1rem">❌ ${e.message}</td></tr>`; }
 }
 
 function renderHistory(rows) {
   const tbody = document.getElementById('hist-body');
-  if (!rows.length) { tbody.innerHTML='<tr><td colspan="7" class="history-empty">No hay reservas</td></tr>'; return; }
+  if (!rows.length) { tbody.innerHTML='<tr><td colspan="8" class="history-empty">No hay reservas</td></tr>'; return; }
   tbody.innerHTML = rows.map(r=>`
     <tr>
       <td style="white-space:nowrap;font-size:.78rem">${escHtml(r.createdFmt)}</td>
@@ -1157,7 +1157,21 @@ function renderHistory(rows) {
       <td>${escHtml(r.user_name)}</td>
       <td>${escHtml(r.calle)}</td>
       <td>${escHtml(r.numero)}</td>
+      <td><button onclick="deleteHistoryReservation(${r.id},'${r.date}',this)"
+          style="padding:.25rem .6rem;border:none;border-radius:6px;background:var(--red-l);
+          color:var(--red);font-size:.75rem;font-weight:600;cursor:pointer"
+          title="Eliminar reserva">🗑</button></td>
     </tr>`).join('');
+}
+
+async function deleteHistoryReservation(id, date, btn) {
+  if (!confirm(`¿Eliminar esta reserva del ${date}?`)) return;
+  btn.disabled = true; btn.textContent = '…';
+  try {
+    await api('DELETE', `/reservations/${id}`);
+    toast('Reserva eliminada', 'success');
+    loadHistory();
+  } catch(e) { toast(e.message, 'error'); btn.disabled=false; btn.textContent='🗑'; }
 }
 
 function filterHistory() {
