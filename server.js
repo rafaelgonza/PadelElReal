@@ -88,6 +88,11 @@ const approvedOnly = (req, res, next) => {
   next();
 };
 
+// Normaliza texto: minúsculas + sin tildes (para comparar direcciones)
+function normalizeAddr(s) {
+  return s.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+}
+
 function getConfig() { return db.prepare('SELECT * FROM time_config WHERE id = 1').get(); }
 function todayString() { return new Date().toISOString().split('T')[0]; }
 function nowMinutes() { const n = new Date(); return n.getHours() * 60 + n.getMinutes(); }
@@ -111,6 +116,14 @@ app.post('/api/auth/register', (req, res) => {
     return res.status(400).json({ error: 'Todos los campos son obligatorios' });
   if (username.trim().length < 3) return res.status(400).json({ error: 'Usuario debe tener al menos 3 caracteres' });
   if (password.length < 4) return res.status(400).json({ error: 'Contraseña mínimo 4 caracteres' });
+
+  // Validar que calle+número no existan ya (sin tildes, sin mayúsculas)
+  const calleNorm  = normalizeAddr(calle);
+  const numeroNorm = normalizeAddr(numero);
+  const allUsers   = db.prepare('SELECT calle, numero FROM users').all();
+  const addrTaken  = allUsers.some(u => normalizeAddr(u.calle) === calleNorm && normalizeAddr(u.numero) === numeroNorm);
+  if (addrTaken) return res.status(400).json({ error: 'Ya existe un usuario registrado con esa dirección. Si crees que es un error, contacta con el administrador del club.' });
+
   try {
     db.prepare('INSERT INTO users (username, name, password, calle, numero, approved) VALUES (?,?,?,?,?,0)')
       .run(username.trim().toLowerCase(), name.trim(), bcrypt.hashSync(password, 10), calle.trim(), numero.trim());
@@ -154,8 +167,15 @@ app.post('/api/reservations', authenticate, approvedOnly, (req, res) => {
   if (isNaN(idx) || idx < 0 || idx >= cfg.slots_count) return res.status(400).json({ error: 'Horario no válido' });
   if (date === todayString() && nowMinutes() >= cfg.start_hour*60+cfg.start_minute+idx*90)
     return res.status(400).json({ error: 'Esa hora ya ha pasado' });
-  if (db.prepare('SELECT id FROM reservations WHERE user_id=? AND date=?').get(req.user.id, date))
-    return res.status(400).json({ error: 'Ya tienes una reserva ese día (máximo 1 por día)' });
+
+  // Verificar que el turno solicitado no colisiona con turnos ya reservados por este usuario:
+  // No puede reservar el mismo turno, el anterior ni el posterior (en cualquier pista)
+  const userReservationsDay = db.prepare('SELECT slot_index FROM reservations WHERE user_id=? AND date=?').all(req.user.id, date);
+  for (const existing of userReservationsDay) {
+    if (Math.abs(existing.slot_index - idx) <= 1) {
+      return res.status(400).json({ error: 'No puedes reservar ese turno: es el mismo, el anterior o el siguiente a una reserva que ya tienes ese día.' });
+    }
+  }
   try {
     const r = db.prepare('INSERT INTO reservations (user_id,court_id,date,slot_index) VALUES (?,?,?,?)').run(req.user.id, Number(court_id), date, idx);
     res.json({ id: r.lastInsertRowid, message: '¡Reserva creada!' });

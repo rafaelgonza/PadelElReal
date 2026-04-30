@@ -341,7 +341,7 @@
       <div class="legend-item"><div class="legend-dot" style="background:var(--green-l);border:1.5px solid var(--green)"></div><span>Disponible</span></div>
       <div class="legend-item"><div class="legend-dot" style="background:var(--blue-l);border:1.5px solid var(--blue)"></div><span>Tu reserva</span></div>
       <div class="legend-item"><div class="legend-dot" style="background:var(--g100);border:1.5px solid var(--g200)"></div><span>Ocupada</span></div>
-      <div class="legend-item"><div class="legend-dot" style="background:var(--amber-l);border:1.5px solid var(--amber)"></div><span>Límite día</span></div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--amber-l);border:1.5px solid var(--amber)"></div><span>Turno bloqueado</span></div>
     </div>
     <div class="grid-card">
       <table class="grid-table">
@@ -636,7 +636,12 @@ function renderGrid(date, today, nowMin) {
   body.innerHTML = '';
   const resMap = {};
   S.reservations.forEach(r => resMap[`${r.court_id}_${r.slot_index}`] = r);
-  const userDayRes = S.reservations.find(r => r.user_id === S.user.id);
+
+  // Turnos bloqueados para el usuario: índices propios ±1
+  const userSlots = S.reservations.filter(r => r.user_id === S.user.id).map(r => r.slot_index);
+  const blockedIdxs = new Set();
+  userSlots.forEach(i => { blockedIdxs.add(i-1); blockedIdxs.add(i); blockedIdxs.add(i+1); });
+
   const isToday = date === today;
 
   S.slots.forEach(slot => {
@@ -648,6 +653,7 @@ function renderGrid(date, today, nowMin) {
 
     const slotMin = toMin(slot.start);
     const isPast = isToday && nowMin >= slotMin;
+    const isBlocked = blockedIdxs.has(slot.index);
 
     [1,2].forEach(courtId => {
       const td = document.createElement('td');
@@ -667,9 +673,9 @@ function renderGrid(date, today, nowMin) {
           btn.title = addr;
           btn.onclick = () => openAddrModal(res, courtId, slot);
         }
-      } else if (userDayRes) {
-        btn = mkBtn('slot-locked','🔒 Límite día',false);
-        btn.title='Ya tienes una reserva este día';
+      } else if (isBlocked) {
+        btn = mkBtn('slot-locked','🔒 No disponible',false);
+        btn.title='No puedes reservar turnos adyacentes a los tuyos';
       } else {
         btn = mkBtn('slot-available','+ Reservar',true);
         btn.onclick = () => openReserveModal(courtId, slot, date);
