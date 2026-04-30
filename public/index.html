@@ -1,1396 +1,893 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🎾 Pádel — Reservas</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>🎾 Club El Real de Espartinas — Reservas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
   <style>
-    /* ─── RESET & VARS ─────────────────────────────────────────── */
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    :root {
-      --green:     #1a6b3a;
-      --green-d:   #135029;
-      --green-m:   #2d8a52;
-      --green-l:   #e8f5ee;
-      --green-ll:  #f3faf6;
-      --amber:     #f59e0b;
-      --amber-l:   #fef3c7;
-      --red:       #dc2626;
-      --red-l:     #fee2e2;
-      --blue:      #1d4ed8;
-      --blue-l:    #dbeafe;
-      --gray-50:   #f9fafb;
-      --gray-100:  #f3f4f6;
-      --gray-200:  #e5e7eb;
-      --gray-400:  #9ca3af;
-      --gray-600:  #4b5563;
-      --gray-900:  #111827;
-      --white:     #ffffff;
-      --font-head: 'Barlow Condensed', sans-serif;
-      --font-body: 'DM Sans', sans-serif;
-      --r:         10px;
-      --r-lg:      16px;
-      --shadow:    0 2px 8px rgba(0,0,0,.08);
-      --shadow-lg: 0 12px 32px rgba(0,0,0,.14);
-    }
-
-    html { scroll-behavior: smooth; }
-
-    body {
-      font-family: var(--font-body);
-      background: var(--green-ll);
-      color: var(--gray-900);
-      min-height: 100vh;
-      -webkit-font-smoothing: antialiased;
-    }
-
-    button { font-family: var(--font-body); cursor: pointer; }
-    input  { font-family: var(--font-body); }
-
-    /* ─── AUTH SCREEN ───────────────────────────────────────────── */
-    #auth-screen {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 1.5rem;
-      background: linear-gradient(145deg, #0d3d1f 0%, #1a6b3a 45%, #2d9955 100%);
-      position: relative;
-      overflow: hidden;
-    }
-
-    #auth-screen::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Ccircle cx='30' cy='30' r='20'/%3E%3Ccircle cx='30' cy='30' r='10'/%3E%3Cline x1='10' y1='30' x2='50' y2='30' stroke='%23fff' stroke-width='1'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat;
-      pointer-events: none;
-    }
-
-    .auth-card {
-      background: var(--white);
-      border-radius: 20px;
-      padding: 2.75rem 2.5rem;
-      width: 100%;
-      max-width: 420px;
-      box-shadow: var(--shadow-lg);
-      position: relative;
-      z-index: 1;
-      animation: slideUp .4s ease;
-    }
-
-    @keyframes slideUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    .auth-logo {
-      text-align: center;
-      margin-bottom: 2rem;
-    }
-
-    .auth-logo .icon {
-      width: 64px;
-      height: 64px;
-      background: var(--green);
-      border-radius: 18px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 2rem;
-      margin-bottom: .75rem;
-      box-shadow: 0 4px 16px rgba(26,107,58,.35);
-    }
-
-    .auth-logo h1 {
-      font-family: var(--font-head);
-      font-size: 2rem;
-      font-weight: 800;
-      letter-spacing: .5px;
-      color: var(--gray-900);
-      line-height: 1;
-    }
-
-    .auth-logo p {
-      color: var(--gray-400);
-      font-size: .875rem;
-      margin-top: .375rem;
-    }
-
-    .auth-tabs {
-      display: flex;
-      background: var(--gray-100);
-      border-radius: var(--r);
-      padding: 4px;
-      margin-bottom: 1.75rem;
-      gap: 4px;
-    }
-
-    .auth-tab {
-      flex: 1;
-      padding: .5rem;
-      border: none;
-      background: transparent;
-      border-radius: 8px;
-      font-size: .875rem;
-      font-weight: 600;
-      color: var(--gray-400);
-      transition: all .2s;
-    }
-
-    .auth-tab.active {
-      background: var(--white);
-      color: var(--green);
-      box-shadow: var(--shadow);
-    }
-
-    .form-pane { display: none; }
-    .form-pane.active { display: block; animation: fadeIn .2s ease; }
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-    .form-group { margin-bottom: 1rem; }
-
-    .form-group label {
-      display: block;
-      font-size: .8rem;
-      font-weight: 600;
-      color: var(--gray-600);
-      margin-bottom: .4rem;
-      text-transform: uppercase;
-      letter-spacing: .5px;
-    }
-
-    .form-group input {
-      width: 100%;
-      padding: .7rem 1rem;
-      border: 2px solid var(--gray-200);
-      border-radius: var(--r);
-      font-size: .95rem;
-      outline: none;
-      transition: border-color .2s, box-shadow .2s;
-      color: var(--gray-900);
-    }
-
-    .form-group input:focus {
-      border-color: var(--green);
-      box-shadow: 0 0 0 4px rgba(26,107,58,.1);
-    }
-
-    .btn-auth {
-      width: 100%;
-      padding: .8rem;
-      background: var(--green);
-      color: white;
-      border: none;
-      border-radius: var(--r);
-      font-size: 1rem;
-      font-weight: 700;
-      font-family: var(--font-head);
-      letter-spacing: .5px;
-      transition: background .2s, transform .1s;
-      margin-top: .5rem;
-    }
-
-    .btn-auth:hover  { background: var(--green-d); }
-    .btn-auth:active { transform: scale(.98); }
-
-    .auth-error {
-      background: var(--red-l);
-      color: var(--red);
-      border-radius: var(--r);
-      padding: .625rem .875rem;
-      font-size: .875rem;
-      margin-bottom: 1rem;
-      display: none;
-    }
-    .auth-error.show { display: block; animation: fadeIn .2s; }
-
-    /* ─── APP SCREEN ────────────────────────────────────────────── */
-    #app-screen { display: none; flex-direction: column; min-height: 100vh; }
-    #app-screen.show { display: flex; }
-
-    /* ─── HEADER ───────────────────────────────────────────────── */
-    header {
-      background: var(--green);
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      box-shadow: 0 2px 12px rgba(0,0,0,.2);
-    }
-
-    .header-inner {
-      max-width: 960px;
-      margin: 0 auto;
-      padding: .875rem 1.5rem;
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-    }
-
-    .header-brand {
-      display: flex;
-      align-items: center;
-      gap: .625rem;
-      flex: 1;
-    }
-
-    .header-brand .emoji { font-size: 1.5rem; }
-
-    .header-brand h2 {
-      font-family: var(--font-head);
-      font-size: 1.5rem;
-      font-weight: 800;
-      color: var(--white);
-      letter-spacing: .5px;
-      line-height: 1;
-    }
-
-    .header-brand small {
-      color: rgba(255,255,255,.65);
-      font-size: .75rem;
-      font-weight: 400;
-      display: block;
-      line-height: 1;
-    }
-
-    .header-actions { display: flex; align-items: center; gap: .625rem; }
-
-    .user-pill {
-      display: flex;
-      align-items: center;
-      gap: .5rem;
-      background: rgba(255,255,255,.15);
-      border-radius: 100px;
-      padding: .375rem .875rem .375rem .5rem;
-    }
-
-    .user-avatar {
-      width: 28px;
-      height: 28px;
-      background: var(--amber);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: .8rem;
-      font-weight: 700;
-      color: var(--gray-900);
-      flex-shrink: 0;
-    }
-
-    .user-pill span {
-      font-size: .85rem;
-      font-weight: 600;
-      color: var(--white);
-      max-width: 120px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .btn-header {
-      padding: .425rem .875rem;
-      border-radius: 8px;
-      border: none;
-      font-size: .8rem;
-      font-weight: 600;
-      transition: all .2s;
-    }
-
-    .btn-admin {
-      background: var(--amber);
-      color: var(--gray-900);
-    }
-    .btn-admin:hover { background: #e5920a; }
-
-    .btn-logout {
-      background: rgba(255,255,255,.15);
-      color: var(--white);
-    }
-    .btn-logout:hover { background: rgba(255,255,255,.25); }
-
-    /* ─── MAIN CONTENT ──────────────────────────────────────────── */
-    .main {
-      max-width: 960px;
-      margin: 0 auto;
-      padding: 1.75rem 1.5rem;
-      width: 100%;
-      flex: 1;
-    }
-
-    /* ─── DATE TABS ─────────────────────────────────────────────── */
-    .section-title {
-      font-family: var(--font-head);
-      font-size: 1.15rem;
-      font-weight: 700;
-      letter-spacing: .5px;
-      color: var(--gray-600);
-      text-transform: uppercase;
-      margin-bottom: .875rem;
-    }
-
-    .date-tabs {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: .625rem;
-      margin-bottom: 1.5rem;
-    }
-
-    .date-tab {
-      padding: .875rem 1rem;
-      background: var(--white);
-      border: 2.5px solid var(--gray-200);
-      border-radius: var(--r-lg);
-      cursor: pointer;
-      text-align: center;
-      transition: all .2s;
-      box-shadow: var(--shadow);
-    }
-
-    .date-tab:hover {
-      border-color: var(--green-m);
-      transform: translateY(-1px);
-    }
-
-    .date-tab.active {
-      border-color: var(--green);
-      background: var(--green-l);
-    }
-
-    .tab-label {
-      display: block;
-      font-family: var(--font-head);
-      font-size: 1rem;
-      font-weight: 700;
-      letter-spacing: .5px;
-      color: var(--gray-600);
-      text-transform: uppercase;
-    }
-
-    .date-tab.active .tab-label { color: var(--green); }
-
-    .tab-date {
-      display: block;
-      font-size: .8rem;
-      color: var(--gray-400);
-      margin-top: .2rem;
-    }
-
-    .date-tab.active .tab-date { color: var(--green-m); }
-
-    /* ─── LEGEND ────────────────────────────────────────────────── */
-    .legend {
-      display: flex;
-      gap: 1.25rem;
-      margin-bottom: 1.25rem;
-      flex-wrap: wrap;
-    }
-
-    .legend-item {
-      display: flex;
-      align-items: center;
-      gap: .375rem;
-      font-size: .8rem;
-      color: var(--gray-600);
-    }
-
-    .legend-dot {
-      width: 12px;
-      height: 12px;
-      border-radius: 3px;
-    }
-
-    /* ─── GRID ──────────────────────────────────────────────────── */
-    .grid-card {
-      background: var(--white);
-      border-radius: var(--r-lg);
-      box-shadow: var(--shadow);
-      overflow: hidden;
-    }
-
-    .grid-table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-
-    .grid-table thead th {
-      background: var(--green);
-      color: var(--white);
-      padding: 1rem 1.25rem;
-      font-family: var(--font-head);
-      font-size: 1.1rem;
-      font-weight: 700;
-      letter-spacing: .5px;
-      text-align: center;
-    }
-
-    .grid-table thead th:first-child {
-      text-align: left;
-      width: 110px;
-    }
-
-    .grid-table tbody tr { border-bottom: 1px solid var(--gray-100); }
-    .grid-table tbody tr:last-child { border-bottom: none; }
-    .grid-table tbody tr:hover { background: rgba(0,0,0,.015); }
-
-    .grid-table td {
-      padding: .75rem 1.25rem;
-      text-align: center;
-      vertical-align: middle;
-    }
-
-    .time-cell {
-      text-align: left;
-      white-space: nowrap;
-    }
-
-    .time-main {
-      font-family: var(--font-head);
-      font-size: 1.1rem;
-      font-weight: 700;
-      color: var(--gray-900);
-      display: block;
-      line-height: 1;
-    }
-
-    .time-end {
-      font-size: .75rem;
-      color: var(--gray-400);
-      display: block;
-      margin-top: .15rem;
-    }
-
-    /* ─── SLOT BUTTONS ──────────────────────────────────────────── */
-    .slot-btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: .35rem;
-      padding: .55rem 1.1rem;
-      border-radius: 8px;
-      font-size: .875rem;
-      font-weight: 600;
-      border: none;
-      transition: all .18s;
-      min-width: 130px;
-      line-height: 1.2;
-    }
-
-    .slot-available {
-      background: var(--green-l);
-      color: var(--green);
-      cursor: pointer;
-    }
-    .slot-available:hover {
-      background: var(--green);
-      color: var(--white);
-      transform: scale(1.03);
-      box-shadow: 0 3px 10px rgba(26,107,58,.3);
-    }
-
-    .slot-mine {
-      background: var(--blue-l);
-      color: var(--blue);
-      cursor: pointer;
-    }
-    .slot-mine:hover {
-      background: #bfdbfe;
-    }
-    .slot-mine-text { font-size: .75rem; }
-
-    .slot-taken {
-      background: var(--gray-100);
-      color: var(--gray-400);
-      cursor: default;
-      font-size: .8rem;
-    }
-
-    .slot-past {
-      background: var(--gray-50);
-      color: #d1d5db;
-      cursor: default;
-    }
-
-    .slot-locked {
-      background: var(--amber-l);
-      color: #92400e;
-      cursor: default;
-      font-size: .8rem;
-    }
-
-    /* Loading state */
-    .loading-row td {
-      text-align: center;
-      padding: 3rem 1rem;
-      color: var(--gray-400);
-    }
-
-    .spinner {
-      display: inline-block;
-      width: 28px;
-      height: 28px;
-      border: 3px solid var(--green-l);
-      border-top-color: var(--green);
-      border-radius: 50%;
-      animation: spin .7s linear infinite;
-      margin-bottom: .5rem;
-    }
-
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* ─── MODALS ────────────────────────────────────────────────── */
-    .overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,.55);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 1.25rem;
-      z-index: 200;
-      backdrop-filter: blur(2px);
-    }
-    .overlay.show { display: flex; animation: fadeIn .2s; }
-
-    .modal {
-      background: var(--white);
-      border-radius: 20px;
-      padding: 2rem;
-      max-width: 420px;
-      width: 100%;
-      box-shadow: var(--shadow-lg);
-      animation: slideUp .25s ease;
-    }
-
-    .modal-icon {
-      width: 52px;
-      height: 52px;
-      border-radius: 14px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.5rem;
-      margin-bottom: 1rem;
-    }
-
-    .modal-icon.reserve  { background: var(--green-l); }
-    .modal-icon.cancel   { background: var(--red-l); }
-    .modal-icon.admin    { background: var(--amber-l); }
-
-    .modal-title {
-      font-family: var(--font-head);
-      font-size: 1.5rem;
-      font-weight: 800;
-      margin-bottom: .375rem;
-      letter-spacing: .3px;
-    }
-
-    .modal-subtitle {
-      color: var(--gray-400);
-      font-size: .875rem;
-      margin-bottom: 1.25rem;
-    }
-
-    .info-card {
-      background: var(--green-l);
-      border-radius: var(--r);
-      padding: 1rem 1.125rem;
-      margin-bottom: 1.5rem;
-    }
-
-    .info-card.danger { background: var(--red-l); }
-
-    .info-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: .875rem;
-      padding: .25rem 0;
-    }
-
-    .info-row:not(:last-child) { border-bottom: 1px solid rgba(0,0,0,.06); }
-    .info-label { color: var(--gray-600); }
-    .info-value { font-weight: 700; color: var(--green-d); }
-    .info-card.danger .info-value { color: var(--red); }
-
-    .modal-actions { display: flex; gap: .75rem; }
-
-    .btn-modal-cancel {
-      flex: 1;
-      padding: .7rem;
-      border: 2px solid var(--gray-200);
-      border-radius: var(--r);
-      background: var(--white);
-      font-weight: 600;
-      color: var(--gray-600);
-      transition: all .2s;
-    }
-    .btn-modal-cancel:hover { border-color: var(--gray-400); }
-
-    .btn-modal-confirm {
-      flex: 2;
-      padding: .7rem;
-      border: none;
-      border-radius: var(--r);
-      background: var(--green);
-      color: white;
-      font-weight: 700;
-      font-family: var(--font-head);
-      font-size: 1rem;
-      letter-spacing: .3px;
-      transition: background .2s;
-    }
-    .btn-modal-confirm:hover { background: var(--green-d); }
-
-    .btn-modal-delete {
-      flex: 2;
-      padding: .7rem;
-      border: none;
-      border-radius: var(--r);
-      background: var(--red);
-      color: white;
-      font-weight: 700;
-      font-family: var(--font-head);
-      font-size: 1rem;
-      letter-spacing: .3px;
-      transition: background .2s;
-    }
-    .btn-modal-delete:hover { background: #b91c1c; }
-
-    /* ─── ADMIN MODAL ───────────────────────────────────────────── */
-    .admin-modal { max-width: 520px; }
-
-    .admin-section { margin-bottom: 1.5rem; }
-
-    .admin-section h4 {
-      font-family: var(--font-head);
-      font-size: 1rem;
-      font-weight: 700;
-      letter-spacing: .5px;
-      text-transform: uppercase;
-      color: var(--gray-600);
-      margin-bottom: .875rem;
-      padding-bottom: .5rem;
-      border-bottom: 1px solid var(--gray-200);
-    }
-
-    .config-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: .875rem;
-    }
-
-    .config-item label {
-      display: block;
-      font-size: .75rem;
-      font-weight: 600;
-      color: var(--gray-600);
-      text-transform: uppercase;
-      letter-spacing: .4px;
-      margin-bottom: .375rem;
-    }
-
-    .config-item select,
-    .config-item input[type="number"] {
-      width: 100%;
-      padding: .55rem .75rem;
-      border: 2px solid var(--gray-200);
-      border-radius: var(--r);
-      font-size: .9rem;
-      font-family: var(--font-body);
-      outline: none;
-      transition: border-color .2s;
-    }
-
-    .config-item select:focus,
-    .config-item input:focus {
-      border-color: var(--green);
-    }
-
-    .preview-box {
-      background: var(--green-l);
-      border-radius: var(--r);
-      padding: .875rem 1rem;
-      margin-top: .875rem;
-    }
-
-    .preview-box p {
-      font-size: .8rem;
-      font-weight: 600;
-      color: var(--green-d);
-      margin-bottom: .375rem;
-    }
-
-    .preview-slots-list {
-      display: flex;
-      flex-wrap: wrap;
-      gap: .375rem;
-    }
-
-    .preview-slot-tag {
-      background: var(--green);
-      color: white;
-      border-radius: 6px;
-      padding: .2rem .5rem;
-      font-size: .75rem;
-      font-weight: 600;
-    }
-
-    .admin-error {
-      color: var(--red);
-      font-size: .875rem;
-      margin-top: .5rem;
-      min-height: 1.2em;
-    }
-
-    /* ─── TOAST ─────────────────────────────────────────────────── */
-    #toast {
-      position: fixed;
-      bottom: 1.75rem;
-      left: 50%;
-      transform: translateX(-50%) translateY(80px);
-      background: var(--gray-900);
-      color: var(--white);
-      padding: .7rem 1.5rem;
-      border-radius: 100px;
-      font-size: .875rem;
-      font-weight: 600;
-      z-index: 400;
-      transition: transform .3s cubic-bezier(.34,1.56,.64,1);
-      pointer-events: none;
-      white-space: nowrap;
-      box-shadow: 0 4px 16px rgba(0,0,0,.25);
-    }
-    #toast.show { transform: translateX(-50%) translateY(0); }
-    #toast.success { background: var(--green); }
-    #toast.error   { background: var(--red); }
-
-    /* ─── RESPONSIVE ────────────────────────────────────────────── */
-    @media (max-width: 640px) {
-      .header-inner { padding: .75rem 1rem; }
-      .user-pill span { max-width: 80px; }
-      .main { padding: 1.25rem 1rem; }
-      .date-tab { padding: .75rem .5rem; }
-      .tab-label { font-size: .9rem; }
-      .tab-date  { font-size: .72rem; }
-      .grid-table thead th,
-      .grid-table td { padding: .625rem .875rem; }
-      .slot-btn { min-width: 100px; padding: .5rem .75rem; font-size: .8rem; }
-      .config-grid { grid-template-columns: 1fr 1fr; }
-      .legend { gap: .875rem; }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --green:#1a6b3a;--green-d:#135029;--green-m:#2d8a52;--green-l:#e8f5ee;--green-ll:#f3faf6;
+      --amber:#f59e0b;--amber-l:#fef3c7;--red:#dc2626;--red-l:#fee2e2;
+      --blue:#1d4ed8;--blue-l:#dbeafe;
+      --g50:#f9fafb;--g100:#f3f4f6;--g200:#e5e7eb;--g400:#9ca3af;--g600:#4b5563;--g900:#111827;
+      --white:#fff;--fh:'Barlow Condensed',sans-serif;--fb:'DM Sans',sans-serif;
+      --r:10px;--rlg:16px;--sh:0 2px 8px rgba(0,0,0,.08);--shlg:0 12px 32px rgba(0,0,0,.14);
+    }
+    body{font-family:var(--fb);background:var(--green-ll);color:var(--g900);min-height:100vh;-webkit-font-smoothing:antialiased}
+    button,input,select{font-family:var(--fb)}
+    button{cursor:pointer}
+
+    /* AUTH */
+    #auth-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1.5rem;
+      background:linear-gradient(145deg,#0d3d1f 0%,#1a6b3a 50%,#2d9955 100%);position:relative;overflow:hidden}
+    #auth-screen::before{content:'';position:absolute;inset:0;opacity:.04;
+      background:repeating-linear-gradient(45deg,#fff 0,#fff 1px,transparent 0,transparent 50%);background-size:20px 20px}
+    .auth-card{background:var(--white);border-radius:20px;padding:2.5rem;width:100%;max-width:440px;
+      box-shadow:var(--shlg);position:relative;z-index:1;animation:slideUp .4s ease}
+    @keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+    .auth-logo{text-align:center;margin-bottom:1.75rem}
+    .auth-logo .icon{width:68px;height:68px;background:var(--green);border-radius:18px;display:inline-flex;
+      align-items:center;justify-content:center;font-size:2.2rem;margin-bottom:.75rem;box-shadow:0 4px 16px rgba(26,107,58,.35)}
+    .auth-logo h1{font-family:var(--fh);font-size:1.6rem;font-weight:800;color:var(--g900);line-height:1.1;letter-spacing:.5px}
+    .auth-logo p{color:var(--g400);font-size:.8rem;margin-top:.3rem;text-transform:uppercase;letter-spacing:.5px}
+    .auth-tabs{display:flex;background:var(--g100);border-radius:var(--r);padding:4px;margin-bottom:1.5rem;gap:4px}
+    .auth-tab{flex:1;padding:.5rem;border:none;background:transparent;border-radius:8px;font-size:.875rem;
+      font-weight:600;color:var(--g400);transition:all .2s}
+    .auth-tab.active{background:var(--white);color:var(--green);box-shadow:var(--sh)}
+    .form-pane{display:none}.form-pane.active{display:block;animation:fadeIn .2s}
+    .form-group{margin-bottom:.875rem}
+    .form-group label{display:block;font-size:.75rem;font-weight:600;color:var(--g600);margin-bottom:.35rem;
+      text-transform:uppercase;letter-spacing:.5px}
+    .form-group input{width:100%;padding:.65rem 1rem;border:2px solid var(--g200);border-radius:var(--r);
+      font-size:.95rem;outline:none;transition:border-color .2s,box-shadow .2s;color:var(--g900)}
+    .form-group input:focus{border-color:var(--green);box-shadow:0 0 0 4px rgba(26,107,58,.1)}
+    .form-row{display:grid;grid-template-columns:1fr auto;gap:.75rem}
+    .form-row .form-group:last-child input{width:100px}
+    .btn-auth{width:100%;padding:.8rem;background:var(--green);color:white;border:none;border-radius:var(--r);
+      font-size:1rem;font-weight:700;font-family:var(--fh);letter-spacing:.5px;transition:background .2s,transform .1s;margin-top:.5rem}
+    .btn-auth:hover{background:var(--green-d)}.btn-auth:active{transform:scale(.98)}
+    .auth-error{background:var(--red-l);color:var(--red);border-radius:var(--r);padding:.625rem .875rem;
+      font-size:.875rem;margin-bottom:1rem;display:none}
+    .auth-error.show{display:block;animation:fadeIn .2s}
+    .auth-success{background:var(--green-l);color:var(--green-d);border-radius:var(--r);padding:.875rem 1rem;
+      font-size:.9rem;margin-bottom:1rem;display:none;line-height:1.5}
+    .auth-success.show{display:block;animation:fadeIn .2s}
+
+    /* PENDING SCREEN */
+    #pending-screen{display:none;min-height:100vh;align-items:center;justify-content:center;padding:1.5rem;
+      background:linear-gradient(145deg,#0d3d1f 0%,#1a6b3a 50%,#2d9955 100%)}
+    #pending-screen.show{display:flex}
+    .pending-card{background:var(--white);border-radius:20px;padding:2.5rem;max-width:400px;width:100%;
+      text-align:center;box-shadow:var(--shlg)}
+    .pending-icon{font-size:3rem;margin-bottom:1rem}
+    .pending-card h2{font-family:var(--fh);font-size:1.75rem;font-weight:800;color:var(--g900);margin-bottom:.5rem}
+    .pending-card p{color:var(--g600);font-size:.95rem;line-height:1.6;margin-bottom:1.5rem}
+    .btn-back{padding:.65rem 1.5rem;border:2px solid var(--g200);border-radius:var(--r);background:white;
+      font-weight:600;color:var(--g600);transition:all .2s}
+    .btn-back:hover{border-color:var(--g400)}
+
+    /* APP */
+    #app-screen{display:none;flex-direction:column;min-height:100vh}
+    #app-screen.show{display:flex}
+
+    /* HEADER */
+    header{background:var(--green);position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.2)}
+    .header-inner{max-width:980px;margin:0 auto;padding:.875rem 1.5rem;display:flex;align-items:center;gap:1rem}
+    .header-brand{flex:1}
+    .header-brand h2{font-family:var(--fh);font-size:1.35rem;font-weight:800;color:var(--white);letter-spacing:.5px;
+      line-height:1.1;text-transform:uppercase}
+    .header-brand small{color:rgba(255,255,255,.6);font-size:.75rem;font-weight:400}
+    .header-actions{display:flex;align-items:center;gap:.5rem}
+    .user-pill{display:flex;align-items:center;gap:.5rem;background:rgba(255,255,255,.15);border-radius:100px;padding:.35rem .875rem .35rem .45rem}
+    .user-avatar{width:28px;height:28px;background:var(--amber);border-radius:50%;display:flex;align-items:center;
+      justify-content:center;font-size:.75rem;font-weight:700;color:var(--g900);flex-shrink:0}
+    .user-pill span{font-size:.82rem;font-weight:600;color:var(--white);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .btn-hdr{padding:.4rem .875rem;border-radius:8px;border:none;font-size:.78rem;font-weight:600;transition:all .2s}
+    .btn-admin{background:var(--amber);color:var(--g900)}.btn-admin:hover{background:#e5920a}
+    .btn-logout{background:rgba(255,255,255,.15);color:var(--white)}.btn-logout:hover{background:rgba(255,255,255,.25)}
+
+    /* MAIN */
+    .main{max-width:980px;margin:0 auto;padding:1.75rem 1.5rem;width:100%;flex:1}
+    .section-title{font-family:var(--fh);font-size:1.1rem;font-weight:700;letter-spacing:.5px;color:var(--g600);
+      text-transform:uppercase;margin-bottom:.875rem}
+
+    /* DATE TABS */
+    .date-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:.625rem;margin-bottom:1.25rem}
+    .date-tab{padding:.875rem 1rem;background:var(--white);border:2.5px solid var(--g200);border-radius:var(--rlg);
+      cursor:pointer;text-align:center;transition:all .2s;box-shadow:var(--sh)}
+    .date-tab:hover{border-color:var(--green-m);transform:translateY(-1px)}
+    .date-tab.active{border-color:var(--green);background:var(--green-l)}
+    .tab-label{display:block;font-family:var(--fh);font-size:1rem;font-weight:700;letter-spacing:.5px;color:var(--g600);text-transform:uppercase}
+    .date-tab.active .tab-label{color:var(--green)}
+    .tab-date{display:block;font-size:.78rem;color:var(--g400);margin-top:.2rem}
+    .date-tab.active .tab-date{color:var(--green-m)}
+
+    /* LEGEND */
+    .legend{display:flex;gap:1.25rem;margin-bottom:1.1rem;flex-wrap:wrap}
+    .legend-item{display:flex;align-items:center;gap:.375rem;font-size:.78rem;color:var(--g600)}
+    .legend-dot{width:12px;height:12px;border-radius:3px}
+
+    /* GRID */
+    .grid-card{background:var(--white);border-radius:var(--rlg);box-shadow:var(--sh);overflow:hidden}
+    .grid-table{width:100%;border-collapse:collapse}
+    .grid-table thead th{background:var(--green);color:var(--white);padding:1rem 1.25rem;font-family:var(--fh);
+      font-size:1.1rem;font-weight:700;letter-spacing:.5px;text-align:center}
+    .grid-table thead th:first-child{text-align:left;width:105px}
+    .grid-table tbody tr{border-bottom:1px solid var(--g100)}
+    .grid-table tbody tr:last-child{border-bottom:none}
+    .grid-table tbody tr:hover{background:rgba(0,0,0,.012)}
+    .grid-table td{padding:.7rem 1.25rem;text-align:center;vertical-align:middle}
+    .time-cell{text-align:left;white-space:nowrap}
+    .time-main{font-family:var(--fh);font-size:1.1rem;font-weight:700;color:var(--g900);display:block;line-height:1}
+    .time-end{font-size:.72rem;color:var(--g400);display:block;margin-top:.15rem}
+    .loading-row td{text-align:center;padding:3rem;color:var(--g400)}
+    .spinner{display:inline-block;width:28px;height:28px;border:3px solid var(--green-l);border-top-color:var(--green);
+      border-radius:50%;animation:spin .7s linear infinite;margin-bottom:.5rem}
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    /* SLOT BUTTONS */
+    .slot-btn{display:inline-flex;align-items:center;justify-content:center;gap:.3rem;padding:.5rem 1rem;
+      border-radius:8px;font-size:.82rem;font-weight:600;border:none;transition:all .18s;min-width:140px;line-height:1.2;text-align:center}
+    .slot-available{background:var(--green-l);color:var(--green);cursor:pointer}
+    .slot-available:hover{background:var(--green);color:var(--white);transform:scale(1.03);box-shadow:0 3px 10px rgba(26,107,58,.3)}
+    .slot-mine{background:var(--blue-l);color:var(--blue);cursor:pointer;flex-direction:column}
+    .slot-mine:hover{background:#bfdbfe}
+    .slot-mine-sub{font-size:.68rem;font-weight:400;opacity:.85}
+    .slot-taken{background:var(--g100);color:var(--g600);cursor:pointer;flex-direction:column;max-width:160px}
+    .slot-taken:hover{background:var(--g200)}
+    .slot-taken-addr{font-size:.72rem;font-weight:400;color:var(--g400);max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .slot-past{background:var(--g50);color:#d1d5db;cursor:default}
+    .slot-locked{background:var(--amber-l);color:#92400e;cursor:default;font-size:.78rem}
+
+    /* MODALS */
+    .overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;
+      padding:1.25rem;z-index:200;backdrop-filter:blur(2px)}
+    .overlay.show{display:flex;animation:fadeIn .2s}
+    .modal{background:var(--white);border-radius:20px;padding:2rem;max-width:440px;width:100%;
+      box-shadow:var(--shlg);animation:slideUp .25s ease;max-height:90vh;overflow-y:auto}
+    .modal-icon{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;
+      font-size:1.5rem;margin-bottom:1rem}
+    .modal-icon.reserve{background:var(--green-l)}.modal-icon.cancel{background:var(--red-l)}
+    .modal-icon.info{background:var(--blue-l)}.modal-icon.admin{background:var(--amber-l)}
+    .modal-title{font-family:var(--fh);font-size:1.5rem;font-weight:800;margin-bottom:.35rem;letter-spacing:.3px}
+    .modal-sub{color:var(--g400);font-size:.875rem;margin-bottom:1.25rem}
+    .info-card{background:var(--green-l);border-radius:var(--r);padding:1rem 1.125rem;margin-bottom:1.5rem}
+    .info-card.danger{background:var(--red-l)}.info-card.blue{background:var(--blue-l)}
+    .info-row{display:flex;justify-content:space-between;align-items:center;font-size:.875rem;padding:.25rem 0}
+    .info-row:not(:last-child){border-bottom:1px solid rgba(0,0,0,.06)}
+    .info-label{color:var(--g600)}.info-value{font-weight:700;color:var(--green-d)}
+    .info-card.danger .info-value{color:var(--red)}.info-card.blue .info-value{color:var(--blue)}
+    .modal-actions{display:flex;gap:.75rem}
+    .btn-mc{flex:1;padding:.7rem;border:2px solid var(--g200);border-radius:var(--r);background:var(--white);
+      font-weight:600;color:var(--g600);transition:all .2s}
+    .btn-mc:hover{border-color:var(--g400)}
+    .btn-mok{flex:2;padding:.7rem;border:none;border-radius:var(--r);background:var(--green);color:white;
+      font-weight:700;font-family:var(--fh);font-size:1rem;letter-spacing:.3px;transition:background .2s}
+    .btn-mok:hover{background:var(--green-d)}
+    .btn-mdel{flex:2;padding:.7rem;border:none;border-radius:var(--r);background:var(--red);color:white;
+      font-weight:700;font-family:var(--fh);font-size:1rem;letter-spacing:.3px;transition:background .2s}
+    .btn-mdel:hover{background:#b91c1c}
+
+    /* ADMIN MODAL */
+    .admin-modal{max-width:700px}
+    .admin-tabs{display:flex;gap:4px;background:var(--g100);border-radius:var(--r);padding:4px;margin-bottom:1.5rem}
+    .admin-tab{flex:1;padding:.5rem .75rem;border:none;background:transparent;border-radius:8px;font-size:.82rem;
+      font-weight:600;color:var(--g400);transition:all .2s;white-space:nowrap}
+    .admin-tab.active{background:var(--white);color:var(--green);box-shadow:var(--sh)}
+    .admin-pane{display:none}.admin-pane.active{display:block;animation:fadeIn .2s}
+    .config-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.875rem}
+    .cfg-item label{display:block;font-size:.75rem;font-weight:600;color:var(--g600);
+      text-transform:uppercase;letter-spacing:.4px;margin-bottom:.35rem}
+    .cfg-item select,.cfg-item input[type=number]{width:100%;padding:.55rem .75rem;border:2px solid var(--g200);
+      border-radius:var(--r);font-size:.9rem;font-family:var(--fb);outline:none;transition:border-color .2s}
+    .cfg-item select:focus,.cfg-item input:focus{border-color:var(--green)}
+    .preview-box{background:var(--green-l);border-radius:var(--r);padding:.875rem 1rem;margin-top:.875rem}
+    .preview-box p{font-size:.78rem;font-weight:600;color:var(--green-d);margin-bottom:.375rem}
+    .preview-tags{display:flex;flex-wrap:wrap;gap:.375rem}
+    .prev-tag{background:var(--green);color:white;border-radius:6px;padding:.2rem .5rem;font-size:.72rem;font-weight:600}
+    .admin-err{color:var(--red);font-size:.875rem;margin-top:.5rem;min-height:1.2em}
+
+    /* USER LIST */
+    .users-list{display:flex;flex-direction:column;gap:.5rem;max-height:360px;overflow-y:auto}
+    .user-row{display:flex;align-items:center;gap:.75rem;padding:.75rem 1rem;background:var(--g50);
+      border-radius:var(--r);border:1.5px solid var(--g200)}
+    .user-row.pending{border-color:#fcd34d;background:#fffbeb}
+    .user-row.denied{border-color:var(--g200);background:var(--g50);opacity:.7}
+    .user-info{flex:1;min-width:0}
+    .user-info strong{display:block;font-size:.875rem;font-weight:600;color:var(--g900)}
+    .user-info span{display:block;font-size:.75rem;color:var(--g400)}
+    .user-badge-status{font-size:.7rem;font-weight:700;padding:.2rem .5rem;border-radius:100px;white-space:nowrap}
+    .badge-pending{background:#fef3c7;color:#92400e}
+    .badge-ok{background:var(--green-l);color:var(--green-d)}
+    .badge-denied{background:var(--red-l);color:var(--red)}
+    .btn-approve{padding:.4rem .875rem;border:none;border-radius:8px;font-size:.78rem;font-weight:600;transition:all .2s;white-space:nowrap}
+    .btn-grant{background:var(--green-l);color:var(--green-d)}.btn-grant:hover{background:var(--green);color:white}
+    .btn-deny{background:var(--red-l);color:var(--red)}.btn-deny:hover{background:var(--red);color:white}
+    .users-empty{text-align:center;color:var(--g400);padding:2rem;font-size:.875rem}
+
+    /* HISTORY */
+    .history-filter{display:flex;gap:.5rem;margin-bottom:1rem;align-items:center}
+    .history-filter label{font-size:.8rem;font-weight:600;color:var(--g600);white-space:nowrap}
+    .history-filter input[type=date]{padding:.4rem .75rem;border:2px solid var(--g200);border-radius:var(--r);
+      font-size:.85rem;font-family:var(--fb);outline:none}
+    .history-filter input:focus{border-color:var(--green)}
+    .history-table{width:100%;border-collapse:collapse;font-size:.82rem;max-height:340px;display:block;overflow-y:auto}
+    .history-table thead{display:table;width:100%}
+    .history-table tbody{display:table;width:100%}
+    .history-table th{background:var(--g100);color:var(--g600);padding:.5rem .75rem;text-align:left;
+      font-weight:600;font-size:.75rem;text-transform:uppercase;letter-spacing:.3px;white-space:nowrap}
+    .history-table td{padding:.5rem .75rem;border-bottom:1px solid var(--g100);color:var(--g900)}
+    .history-table tbody tr:last-child td{border-bottom:none}
+    .history-table tbody tr:hover td{background:var(--g50)}
+    .court-badge{display:inline-block;background:var(--green-l);color:var(--green-d);border-radius:6px;
+      padding:.15rem .5rem;font-size:.72rem;font-weight:700}
+    .history-empty{text-align:center;color:var(--g400);padding:2rem;font-size:.875rem}
+
+    /* ADDRESS POPUP */
+    #addr-popup{position:fixed;z-index:300;background:var(--g900);color:white;border-radius:10px;
+      padding:.625rem 1rem;font-size:.82rem;font-weight:600;pointer-events:none;display:none;
+      box-shadow:0 4px 16px rgba(0,0,0,.3);max-width:220px;line-height:1.4}
+    #addr-popup::after{content:'';position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);
+      border:6px solid transparent;border-bottom:none;border-top-color:var(--g900)}
+
+    /* TOAST */
+    #toast{position:fixed;bottom:1.75rem;left:50%;transform:translateX(-50%) translateY(80px);
+      background:var(--g900);color:var(--white);padding:.7rem 1.5rem;border-radius:100px;font-size:.875rem;
+      font-weight:600;z-index:400;transition:transform .3s cubic-bezier(.34,1.56,.64,1);pointer-events:none;
+      white-space:nowrap;box-shadow:0 4px 16px rgba(0,0,0,.25)}
+    #toast.show{transform:translateX(-50%) translateY(0)}
+    #toast.success{background:var(--green)}#toast.error{background:var(--red)}
+
+    @media(max-width:640px){
+      .header-inner{padding:.75rem 1rem}.user-pill span{max-width:70px}.main{padding:1.25rem 1rem}
+      .date-tab{padding:.7rem .5rem}.tab-label{font-size:.88rem}.tab-date{font-size:.7rem}
+      .grid-table thead th,.grid-table td{padding:.6rem .75rem}
+      .slot-btn{min-width:115px;padding:.45rem .7rem;font-size:.78rem}
+      .config-grid{grid-template-columns:1fr 1fr}.header-brand h2{font-size:1.1rem}
     }
   </style>
 </head>
 <body>
 
-<!-- ══════════════════════════════════════════════════════════ AUTH -->
+<!-- ═══ AUTH ══════════════════════════════════════════════════════════════ -->
 <div id="auth-screen">
   <div class="auth-card">
     <div class="auth-logo">
       <div class="icon">🎾</div>
-      <h1>PÁDEL CLUB</h1>
-      <p>Gestión de reservas de pistas</p>
+      <h1>Club El Real<br>de Espartinas</h1>
+      <p>Reserva de pistas de pádel</p>
     </div>
-
     <div class="auth-tabs">
-      <button class="auth-tab active" onclick="switchAuthTab('login')">Iniciar sesión</button>
-      <button class="auth-tab" onclick="switchAuthTab('register')">Registrarse</button>
+      <button class="auth-tab active" onclick="switchTab('login')">Iniciar sesión</button>
+      <button class="auth-tab" onclick="switchTab('register')">Registrarse</button>
     </div>
-
     <div id="auth-error" class="auth-error"></div>
+    <div id="auth-ok" class="auth-success"></div>
 
     <!-- Login -->
     <div id="pane-login" class="form-pane active">
-      <div class="form-group">
-        <label>Usuario</label>
-        <input id="login-user" type="text" placeholder="tu_usuario" autocomplete="username" />
+      <div class="form-group"><label>Usuario</label>
+        <input id="l-user" type="text" placeholder="tu_usuario" autocomplete="username"/>
       </div>
-      <div class="form-group">
-        <label>Contraseña</label>
-        <input id="login-pass" type="password" placeholder="••••••••" autocomplete="current-password" />
+      <div class="form-group"><label>Contraseña</label>
+        <input id="l-pass" type="password" placeholder="••••••••" autocomplete="current-password"/>
       </div>
-      <button class="btn-auth" onclick="doLogin()">Entrar</button>
+      <button class="btn-auth" onclick="doLogin()">Entrar →</button>
     </div>
 
     <!-- Register -->
     <div id="pane-register" class="form-pane">
-      <div class="form-group">
-        <label>Nombre completo</label>
-        <input id="reg-name" type="text" placeholder="Juan García" />
+      <div class="form-group"><label>Nombre completo</label>
+        <input id="r-name" type="text" placeholder="Juan García López"/>
       </div>
-      <div class="form-group">
-        <label>Usuario</label>
-        <input id="reg-user" type="text" placeholder="juangarcia" autocomplete="username" />
+      <div class="form-group"><label>Usuario</label>
+        <input id="r-user" type="text" placeholder="juangarcia" autocomplete="username"/>
       </div>
-      <div class="form-group">
-        <label>Contraseña</label>
-        <input id="reg-pass" type="password" placeholder="Mínimo 4 caracteres" autocomplete="new-password" />
+      <div class="form-row">
+        <div class="form-group"><label>Calle / Avenida</label>
+          <input id="r-calle" type="text" placeholder="Calle Mayor"/>
+        </div>
+        <div class="form-group"><label>Nº</label>
+          <input id="r-num" type="text" placeholder="12"/>
+        </div>
+      </div>
+      <div class="form-group"><label>Contraseña</label>
+        <input id="r-pass" type="password" placeholder="Mínimo 4 caracteres" autocomplete="new-password"/>
       </div>
       <button class="btn-auth" onclick="doRegister()">Crear cuenta</button>
     </div>
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════════════════════ APP -->
+<!-- ═══ PENDIENTE APROBACIÓN ══════════════════════════════════════════════ -->
+<div id="pending-screen">
+  <div class="pending-card">
+    <div class="pending-icon">⏳</div>
+    <h2>Cuenta pendiente</h2>
+    <p>Tu registro ha sido recibido. El administrador del club revisará tu solicitud y te dará acceso pronto.</p>
+    <p style="font-size:.8rem;color:var(--g400);margin-bottom:1.5rem">Si tienes dudas, contacta con la administración del club.</p>
+    <button class="btn-back" onclick="backToLogin()">← Volver al inicio</button>
+  </div>
+</div>
+
+<!-- ═══ APP ═══════════════════════════════════════════════════════════════ -->
 <div id="app-screen">
   <header>
     <div class="header-inner">
       <div class="header-brand">
-        <span class="emoji">🎾</span>
-        <div>
-          <h2>PÁDEL CLUB</h2>
-          <small>Reserva tu pista</small>
-        </div>
+        <h2>🎾 Club El Real de Espartinas</h2>
+        <small>Reserva de pistas de pádel</small>
       </div>
       <div class="header-actions">
         <div class="user-pill">
           <div class="user-avatar" id="user-avatar">U</div>
           <span id="user-name-display">Usuario</span>
         </div>
-        <button id="btn-admin" class="btn-header btn-admin" onclick="openAdmin()" style="display:none">⚙️ Admin</button>
-        <button class="btn-header btn-logout" onclick="doLogout()">Salir</button>
+        <button id="btn-admin" class="btn-hdr btn-admin" onclick="openAdmin()" style="display:none">⚙️ Admin</button>
+        <button class="btn-hdr btn-logout" onclick="doLogout()">Salir</button>
       </div>
     </div>
   </header>
 
   <div class="main">
-    <!-- Date selector -->
     <p class="section-title">Selecciona el día</p>
     <div class="date-tabs" id="date-tabs"></div>
-
-    <!-- Legend -->
     <div class="legend">
-      <div class="legend-item">
-        <div class="legend-dot" style="background:var(--green-l);border:1.5px solid var(--green)"></div>
-        <span>Disponible</span>
-      </div>
-      <div class="legend-item">
-        <div class="legend-dot" style="background:var(--blue-l);border:1.5px solid var(--blue)"></div>
-        <span>Tu reserva</span>
-      </div>
-      <div class="legend-item">
-        <div class="legend-dot" style="background:var(--gray-100);border:1.5px solid var(--gray-200)"></div>
-        <span>Ocupada</span>
-      </div>
-      <div class="legend-item">
-        <div class="legend-dot" style="background:var(--amber-l);border:1.5px solid var(--amber)"></div>
-        <span>Ya tienes reserva</span>
-      </div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--green-l);border:1.5px solid var(--green)"></div><span>Disponible</span></div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--blue-l);border:1.5px solid var(--blue)"></div><span>Tu reserva</span></div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--g100);border:1.5px solid var(--g200)"></div><span>Ocupada</span></div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--amber-l);border:1.5px solid var(--amber)"></div><span>Límite día</span></div>
     </div>
-
-    <!-- Grid -->
     <div class="grid-card">
       <table class="grid-table">
-        <thead>
-          <tr>
-            <th>Hora</th>
-            <th>🏸 Pista 1</th>
-            <th>🏸 Pista 2</th>
-          </tr>
-        </thead>
+        <thead><tr><th>Hora</th><th>🏸 Pista 1</th><th>🏸 Pista 2</th></tr></thead>
         <tbody id="grid-body">
-          <tr class="loading-row">
-            <td colspan="3">
-              <div class="spinner"></div>
-              <p>Cargando horarios…</p>
-            </td>
-          </tr>
+          <tr class="loading-row"><td colspan="3"><div class="spinner"></div><p>Cargando…</p></td></tr>
         </tbody>
       </table>
     </div>
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════════════════════ MODAL: RESERVAR -->
+<!-- ═══ MODAL: RESERVAR ═══════════════════════════════════════════════════ -->
 <div id="modal-reserve" class="overlay">
   <div class="modal">
     <div class="modal-icon reserve">🎾</div>
     <h3 class="modal-title">Confirmar reserva</h3>
-    <p class="modal-subtitle">¿Quieres reservar esta pista?</p>
+    <p class="modal-sub">¿Quieres reservar esta pista?</p>
     <div class="info-card">
-      <div class="info-row">
-        <span class="info-label">Pista</span>
-        <span class="info-value" id="r-court">—</span>
-      </div>
-      <div class="info-row">
-        <span class="info-label">Día</span>
-        <span class="info-value" id="r-date">—</span>
-      </div>
-      <div class="info-row">
-        <span class="info-label">Horario</span>
-        <span class="info-value" id="r-time">—</span>
-      </div>
-      <div class="info-row">
-        <span class="info-label">Duración</span>
-        <span class="info-value">1 h 30 min</span>
-      </div>
+      <div class="info-row"><span class="info-label">Pista</span><span class="info-value" id="rv-court">—</span></div>
+      <div class="info-row"><span class="info-label">Día</span><span class="info-value" id="rv-date">—</span></div>
+      <div class="info-row"><span class="info-label">Horario</span><span class="info-value" id="rv-time">—</span></div>
+      <div class="info-row"><span class="info-label">Duración</span><span class="info-value">1 h 30 min</span></div>
     </div>
     <div class="modal-actions">
-      <button class="btn-modal-cancel" onclick="closeModals()">Cancelar</button>
-      <button class="btn-modal-confirm" onclick="confirmReserve()">✓ Reservar</button>
+      <button class="btn-mc" onclick="closeModals()">Cancelar</button>
+      <button class="btn-mok" onclick="confirmReserve()">✓ Reservar</button>
     </div>
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════════════════════ MODAL: CANCELAR -->
+<!-- ═══ MODAL: CANCELAR ═══════════════════════════════════════════════════ -->
 <div id="modal-cancel" class="overlay">
   <div class="modal">
     <div class="modal-icon cancel">🗑️</div>
     <h3 class="modal-title">Eliminar reserva</h3>
-    <p class="modal-subtitle">Esta acción no se puede deshacer.</p>
+    <p class="modal-sub">Esta acción no se puede deshacer.</p>
     <div class="info-card danger">
-      <div class="info-row">
-        <span class="info-label">Pista</span>
-        <span class="info-value" id="c-court">—</span>
-      </div>
-      <div class="info-row">
-        <span class="info-label">Día</span>
-        <span class="info-value" id="c-date">—</span>
-      </div>
-      <div class="info-row">
-        <span class="info-label">Horario</span>
-        <span class="info-value" id="c-time">—</span>
-      </div>
+      <div class="info-row"><span class="info-label">Pista</span><span class="info-value" id="cn-court">—</span></div>
+      <div class="info-row"><span class="info-label">Día</span><span class="info-value" id="cn-date">—</span></div>
+      <div class="info-row"><span class="info-label">Horario</span><span class="info-value" id="cn-time">—</span></div>
     </div>
     <div class="modal-actions">
-      <button class="btn-modal-cancel" onclick="closeModals()">Volver</button>
-      <button class="btn-modal-delete" onclick="confirmCancel()">🗑 Eliminar</button>
+      <button class="btn-mc" onclick="closeModals()">Volver</button>
+      <button class="btn-mdel" onclick="confirmCancel()">🗑 Eliminar</button>
     </div>
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════════════════════ MODAL: ADMIN -->
+<!-- ═══ MODAL: DIRECCIÓN ═══════════════════════════════════════════════════ -->
+<div id="modal-addr" class="overlay">
+  <div class="modal">
+    <div class="modal-icon info">🏠</div>
+    <h3 class="modal-title">Pista reservada</h3>
+    <p class="modal-sub">Reservada por un vecino del club</p>
+    <div class="info-card blue">
+      <div class="info-row"><span class="info-label">Pista</span><span class="info-value" id="ad-court">—</span></div>
+      <div class="info-row"><span class="info-label">Horario</span><span class="info-value" id="ad-time">—</span></div>
+      <div class="info-row"><span class="info-label">Calle</span><span class="info-value" id="ad-calle">—</span></div>
+      <div class="info-row"><span class="info-label">Número</span><span class="info-value" id="ad-num">—</span></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-mok" onclick="closeModals()">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL: ADMIN ═══════════════════════════════════════════════════════ -->
 <div id="modal-admin" class="overlay">
   <div class="modal admin-modal">
     <div class="modal-icon admin">⚙️</div>
     <h3 class="modal-title">Panel de Administración</h3>
-    <p class="modal-subtitle">Configura los horarios de las pistas</p>
-
-    <div class="admin-section">
-      <h4>Configuración de horarios</h4>
-      <div class="config-grid">
-        <div class="config-item">
-          <label>Hora inicio</label>
-          <select id="cfg-hour">
-            <option value="6">06:00</option>
-            <option value="7">07:00</option>
-            <option value="8">08:00</option>
-            <option value="9">09:00</option>
-            <option value="10" selected>10:00</option>
-            <option value="11">11:00</option>
-            <option value="12">12:00</option>
-            <option value="13">13:00</option>
-            <option value="14">14:00</option>
-          </select>
-        </div>
-        <div class="config-item">
-          <label>Minutos</label>
-          <select id="cfg-min">
-            <option value="0" selected>:00</option>
-            <option value="30">:30</option>
-          </select>
-        </div>
-        <div class="config-item">
-          <label>Nº turnos</label>
-          <input id="cfg-slots" type="number" min="1" max="16" value="8" />
-        </div>
-      </div>
-
-      <div class="preview-box" id="admin-preview">
-        <p>Vista previa de horarios:</p>
-        <div class="preview-slots-list" id="preview-list"></div>
-      </div>
-
-      <p class="admin-error" id="admin-error"></p>
+    <p class="modal-sub">Club El Real de Espartinas</p>
+    <div class="admin-tabs">
+      <button class="admin-tab active" onclick="switchAdminTab('config')">⏱ Horarios</button>
+      <button class="admin-tab" onclick="switchAdminTab('users')">👥 Usuarios</button>
+      <button class="admin-tab" onclick="switchAdminTab('history')">📋 Histórico</button>
     </div>
 
-    <div class="modal-actions">
-      <button class="btn-modal-cancel" onclick="closeModals()">Cerrar</button>
-      <button class="btn-modal-confirm" onclick="saveConfig()">💾 Guardar</button>
+    <!-- CONFIG -->
+    <div id="apane-config" class="admin-pane active">
+      <div class="config-grid">
+        <div class="cfg-item"><label>Hora inicio</label>
+          <select id="cfg-h">
+            <option value="6">06:00</option><option value="7">07:00</option><option value="8">08:00</option>
+            <option value="9">09:00</option><option value="10" selected>10:00</option><option value="11">11:00</option>
+            <option value="12">12:00</option><option value="13">13:00</option><option value="14">14:00</option>
+          </select>
+        </div>
+        <div class="cfg-item"><label>Minutos</label>
+          <select id="cfg-m"><option value="0" selected>:00</option><option value="30">:30</option></select>
+        </div>
+        <div class="cfg-item"><label>Nº turnos</label>
+          <input id="cfg-s" type="number" min="1" max="16" value="8"/>
+        </div>
+      </div>
+      <div class="preview-box"><p>Vista previa de horarios:</p><div class="preview-tags" id="prev-tags"></div></div>
+      <p class="admin-err" id="cfg-err"></p>
+      <div class="modal-actions" style="margin-top:1rem">
+        <button class="btn-mc" onclick="closeModals()">Cerrar</button>
+        <button class="btn-mok" onclick="saveConfig()">💾 Guardar</button>
+      </div>
+    </div>
+
+    <!-- USERS -->
+    <div id="apane-users" class="admin-pane">
+      <div class="users-list" id="users-list">
+        <div class="users-empty"><div class="spinner"></div></div>
+      </div>
+      <div class="modal-actions" style="margin-top:1rem">
+        <button class="btn-mok" onclick="closeModals()">Cerrar</button>
+      </div>
+    </div>
+
+    <!-- HISTORY -->
+    <div id="apane-history" class="admin-pane">
+      <div class="history-filter">
+        <label>Filtrar por fecha:</label>
+        <input type="date" id="hist-date" oninput="filterHistory()"/>
+        <button class="btn-mc" style="padding:.4rem .75rem;font-size:.78rem" onclick="clearHistFilter()">✕ Todo</button>
+      </div>
+      <table class="history-table">
+        <thead><tr>
+          <th>Fecha</th><th>Pista</th><th>Horario</th><th>Vecino (Calle)</th><th>Nº</th>
+        </tr></thead>
+        <tbody id="hist-body"></tbody>
+      </table>
+      <div class="modal-actions" style="margin-top:1rem">
+        <button class="btn-mok" onclick="closeModals()">Cerrar</button>
+      </div>
     </div>
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════════════════════ TOAST -->
 <div id="toast"></div>
 
-<!-- ══════════════════════════════════════════════════════════ JS -->
 <script>
-// ─── STATE ──────────────────────────────────────────────────
-const S = {
-  token: null,
-  user:  null,
-  currentDate: null,
-  slots: [],
-  reservations: [],
-  config: null,
-  pendingReserve: null,  // { courtId, slotIndex }
-  pendingCancel:  null,  // { reservationId }
-};
+// ─── STATE ─────────────────────────────────────────────────
+const S = { token:null, user:null, currentDate:null, slots:[], reservations:[], config:null,
+  pendingReserve:null, pendingCancel:null, allHistory:[] };
 
-const DAYS_ES = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
-const MONTHS_ES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+const MONTHS = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+const DAYS   = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
 
-// ─── UTILS ──────────────────────────────────────────────────
-function fmt(date) {
-  // date is YYYY-MM-DD string, parse as local
-  const [y,m,d] = date.split('-').map(Number);
-  const dt = new Date(y, m-1, d);
-  return `${DAYS_ES[dt.getDay()]} ${d} de ${MONTHS_ES[m-1]}`;
+function fmtDate(str) {
+  const [y,m,d] = str.split('-').map(Number);
+  const dt = new Date(y,m-1,d);
+  return `${DAYS[dt.getDay()]} ${d} de ${MONTHS[m-1]}`;
 }
 
-function initDates() {
-  const tabs = document.getElementById('date-tabs');
-  tabs.innerHTML = '';
-  const labels = ['Hoy', 'Mañana', 'Pasado mañana'];
-  const now = new Date();
-  for (let i = 0; i <= 2; i++) {
-    const d = new Date(now);
-    d.setDate(d.getDate() + i);
-    const str = d.toISOString().split('T')[0];
-    const btn = document.createElement('button');
-    btn.className = 'date-tab' + (i === 0 ? ' active' : '');
-    btn.dataset.date = str;
-    btn.innerHTML = `<span class="tab-label">${labels[i]}</span><span class="tab-date">${d.getDate()} ${MONTHS_ES[d.getMonth()]}</span>`;
-    btn.onclick = () => selectDate(str);
-    tabs.appendChild(btn);
-    if (i === 0) S.currentDate = str;
-  }
-}
-
-function selectDate(date) {
-  S.currentDate = date;
-  document.querySelectorAll('.date-tab').forEach(t => {
-    t.classList.toggle('active', t.dataset.date === date);
-  });
-  loadReservations(date);
-}
-
-// ─── API ─────────────────────────────────────────────────────
+// ─── API ───────────────────────────────────────────────────
 async function api(method, path, body) {
-  const opts = { method, headers: { 'Content-Type': 'application/json' } };
+  const opts = { method, headers:{'Content-Type':'application/json'} };
   if (S.token) opts.headers['Authorization'] = `Bearer ${S.token}`;
-  if (body)    opts.body = JSON.stringify(body);
-  const res  = await fetch('/api' + path, opts);
+  if (body) opts.body = JSON.stringify(body);
+  const res = await fetch('/api'+path, opts);
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || 'Error del servidor');
   return data;
 }
 
-// ─── AUTH ─────────────────────────────────────────────────────
-function switchAuthTab(tab) {
+// ─── AUTH ──────────────────────────────────────────────────
+function switchTab(tab) {
   document.getElementById('auth-error').classList.remove('show');
-  document.querySelectorAll('.auth-tab').forEach((b, i) => {
-    b.classList.toggle('active', (i === 0 && tab === 'login') || (i === 1 && tab === 'register'));
-  });
-  document.getElementById('pane-login').classList.toggle('active', tab === 'login');
-  document.getElementById('pane-register').classList.toggle('active', tab === 'register');
+  document.getElementById('auth-ok').classList.remove('show');
+  document.querySelectorAll('.auth-tab').forEach((b,i) => b.classList.toggle('active',(i===0&&tab==='login')||(i===1&&tab==='register')));
+  document.getElementById('pane-login').classList.toggle('active', tab==='login');
+  document.getElementById('pane-register').classList.toggle('active', tab==='register');
 }
 
-function showAuthError(msg) {
+function showAuthErr(msg) {
   const el = document.getElementById('auth-error');
-  el.textContent = msg;
-  el.classList.add('show');
+  el.textContent = msg; el.classList.add('show');
+  document.getElementById('auth-ok').classList.remove('show');
+}
+function showAuthOk(msg) {
+  const el = document.getElementById('auth-ok');
+  el.textContent = msg; el.classList.add('show');
+  document.getElementById('auth-error').classList.remove('show');
 }
 
 async function doLogin() {
-  const username = document.getElementById('login-user').value.trim();
-  const password = document.getElementById('login-pass').value;
-  if (!username || !password) return showAuthError('Por favor, introduce usuario y contraseña');
+  const username = document.getElementById('l-user').value.trim();
+  const password = document.getElementById('l-pass').value;
+  if (!username||!password) return showAuthErr('Introduce usuario y contraseña');
   try {
-    const { token, user } = await api('POST', '/auth/login', { username, password });
+    const { token, user } = await api('POST','/auth/login',{username,password});
     onLogin(token, user);
   } catch(e) {
-    showAuthError(e.message);
+    if (e.message === 'PENDIENTE_APROBACION') {
+      showPending();
+    } else {
+      showAuthErr(e.message);
+    }
   }
 }
 
 async function doRegister() {
-  const name     = document.getElementById('reg-name').value.trim();
-  const username = document.getElementById('reg-user').value.trim();
-  const password = document.getElementById('reg-pass').value;
-  if (!name || !username || !password) return showAuthError('Todos los campos son obligatorios');
+  const name  = document.getElementById('r-name').value.trim();
+  const username = document.getElementById('r-user').value.trim();
+  const calle = document.getElementById('r-calle').value.trim();
+  const numero = document.getElementById('r-num').value.trim();
+  const password = document.getElementById('r-pass').value;
+  if (!name||!username||!calle||!numero||!password) return showAuthErr('Todos los campos son obligatorios');
   try {
-    const { token, user } = await api('POST', '/auth/register', { name, username, password });
-    onLogin(token, user);
-  } catch(e) {
-    showAuthError(e.message);
-  }
+    await api('POST','/auth/register',{name,username,calle,numero,password});
+    showAuthOk('✓ Registro completado. Tu cuenta está pendiente de aprobación por el administrador del club.');
+    // Clear form
+    ['r-name','r-user','r-calle','r-num','r-pass'].forEach(id => document.getElementById(id).value='');
+  } catch(e) { showAuthErr(e.message); }
 }
 
 function onLogin(token, user) {
-  S.token = token;
-  S.user  = user;
+  S.token = token; S.user = user;
   localStorage.setItem('padel_token', token);
   localStorage.setItem('padel_user', JSON.stringify(user));
   showApp();
 }
 
-function doLogout() {
-  S.token = null;
-  S.user  = null;
-  localStorage.removeItem('padel_token');
-  localStorage.removeItem('padel_user');
-  document.getElementById('auth-screen').style.display = 'flex';
+function showPending() {
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('pending-screen').classList.add('show');
   document.getElementById('app-screen').classList.remove('show');
 }
 
+function backToLogin() {
+  document.getElementById('pending-screen').classList.remove('show');
+  document.getElementById('auth-screen').style.display = 'flex';
+}
+
+function doLogout() {
+  S.token=null; S.user=null;
+  localStorage.removeItem('padel_token'); localStorage.removeItem('padel_user');
+  document.getElementById('app-screen').classList.remove('show');
+  document.getElementById('pending-screen').classList.remove('show');
+  document.getElementById('auth-screen').style.display='flex';
+}
+
 function showApp() {
-  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('auth-screen').style.display='none';
+  document.getElementById('pending-screen').classList.remove('show');
   document.getElementById('app-screen').classList.add('show');
-
-  // Set user info in header
   document.getElementById('user-name-display').textContent = S.user.name;
-  const initials = S.user.name.split(' ').map(w => w[0]).slice(0,2).join('').toUpperCase();
-  document.getElementById('user-avatar').textContent = initials;
-
-  if (S.user.is_admin) {
-    document.getElementById('btn-admin').style.display = 'inline-flex';
-  }
-
+  document.getElementById('user-avatar').textContent = S.user.name.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
+  // Admin button: ONLY for admin users
+  document.getElementById('btn-admin').style.display = S.user.is_admin ? 'inline-flex' : 'none';
   initDates();
+}
+
+// ─── DATES ─────────────────────────────────────────────────
+function initDates() {
+  const tabs = document.getElementById('date-tabs');
+  tabs.innerHTML = '';
+  const labels = ['Hoy','Mañana','Pasado mañana'];
+  const now = new Date();
+  for (let i=0; i<=2; i++) {
+    const d = new Date(now); d.setDate(d.getDate()+i);
+    const str = d.toISOString().split('T')[0];
+    const btn = document.createElement('button');
+    btn.className = 'date-tab'+(i===0?' active':'');
+    btn.dataset.date = str;
+    btn.innerHTML = `<span class="tab-label">${labels[i]}</span><span class="tab-date">${d.getDate()} ${MONTHS[d.getMonth()]}</span>`;
+    btn.onclick = () => selectDate(str);
+    tabs.appendChild(btn);
+    if (i===0) S.currentDate = str;
+  }
   loadReservations(S.currentDate);
 }
 
-// ─── LOAD DATA ─────────────────────────────────────────────
+function selectDate(date) {
+  S.currentDate = date;
+  document.querySelectorAll('.date-tab').forEach(t => t.classList.toggle('active', t.dataset.date===date));
+  loadReservations(date);
+}
+
+// ─── LOAD ──────────────────────────────────────────────────
 async function loadReservations(date) {
-  const body = document.getElementById('grid-body');
-  body.innerHTML = `<tr class="loading-row"><td colspan="3"><div class="spinner"></div><p>Cargando…</p></td></tr>`;
+  document.getElementById('grid-body').innerHTML = `<tr class="loading-row"><td colspan="3"><div class="spinner"></div><p>Cargando…</p></td></tr>`;
   try {
-    const data = await api('GET', `/reservations?date=${date}`);
-    S.slots        = data.slots;
-    S.reservations = data.reservations;
-    S.config       = data.config;
+    const data = await api('GET',`/reservations?date=${date}`);
+    S.slots=data.slots; S.reservations=data.reservations; S.config=data.config;
     renderGrid(date, data.today, data.nowMinutes);
   } catch(e) {
-    body.innerHTML = `<tr class="loading-row"><td colspan="3">❌ ${e.message}</td></tr>`;
+    if (e.message==='PENDIENTE_APROBACION') { doLogout(); return; }
+    document.getElementById('grid-body').innerHTML = `<tr class="loading-row"><td colspan="3">❌ ${e.message}</td></tr>`;
   }
 }
 
-// ─── RENDER GRID ───────────────────────────────────────────
+// ─── RENDER ────────────────────────────────────────────────
 function renderGrid(date, today, nowMin) {
   const body = document.getElementById('grid-body');
   body.innerHTML = '';
-
-  // Build lookup: courtId+slotIndex → reservation
   const resMap = {};
-  S.reservations.forEach(r => {
-    resMap[`${r.court_id}_${r.slot_index}`] = r;
-  });
-
-  // Does user already have a reservation on this day?
+  S.reservations.forEach(r => resMap[`${r.court_id}_${r.slot_index}`] = r);
   const userDayRes = S.reservations.find(r => r.user_id === S.user.id);
-  const isToday    = date === today;
+  const isToday = date === today;
 
   S.slots.forEach(slot => {
     const tr = document.createElement('tr');
+    const tdT = document.createElement('td');
+    tdT.className='time-cell';
+    tdT.innerHTML=`<span class="time-main">${slot.start}</span><span class="time-end">hasta ${slot.end}</span>`;
+    tr.appendChild(tdT);
 
-    // Time cell
-    const tdTime = document.createElement('td');
-    tdTime.className = 'time-cell';
-    tdTime.innerHTML = `<span class="time-main">${slot.start}</span><span class="time-end">hasta ${slot.end}</span>`;
-    tr.appendChild(tdTime);
+    const slotMin = toMin(slot.start);
+    const isPast = isToday && nowMin >= slotMin;
 
-    const isPast = isToday && nowMin >= slotMinutes(slot.start);
-
-    [1, 2].forEach(courtId => {
+    [1,2].forEach(courtId => {
       const td = document.createElement('td');
-      const key = `${courtId}_${slot.index}`;
-      const res = resMap[key];
-
+      const res = resMap[`${courtId}_${slot.index}`];
       let btn;
-      if (isPast) {
-        // Past slot
-        btn = mkSlot('slot-past', '—', false);
 
+      if (isPast) {
+        btn = mkBtn('slot-past','—',false);
       } else if (res) {
         if (res.user_id === S.user.id) {
-          // My reservation
-          btn = mkSlot('slot-mine', `<span>✓ Tuya</span><span class="slot-mine-text">Toca para cancelar</span>`, true);
+          btn = mkBtn('slot-mine',`<span>✓ Tuya</span><span class="slot-mine-sub">Toca para cancelar</span>`,true);
           btn.onclick = () => openCancelModal(res, courtId, slot);
         } else {
-          // Someone else's
-          const initials = res.user_name.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
-          btn = mkSlot('slot-taken', `<span>●</span><span>${initials}</span>`, false);
-          btn.title = `Reservada por ${res.user_name}`;
+          // Show address (truncated), click for full popup
+          const addr = `C/ ${res.calle} ${res.numero}`;
+          btn = mkBtn('slot-taken',`<span>● Ocupada</span><span class="slot-taken-addr">${escHtml(addr)}</span>`,true);
+          btn.title = addr;
+          btn.onclick = () => openAddrModal(res, courtId, slot);
         }
-
-      } else if (userDayRes && !res) {
-        // User already has a booking this day but this slot is free
-        btn = mkSlot('slot-locked', '🔒 Límite día', false);
-        btn.title = 'Ya tienes una reserva para este día';
-
+      } else if (userDayRes) {
+        btn = mkBtn('slot-locked','🔒 Límite día',false);
+        btn.title='Ya tienes una reserva este día';
       } else {
-        // Available
-        btn = mkSlot('slot-available', '+ Reservar', true);
+        btn = mkBtn('slot-available','+ Reservar',true);
         btn.onclick = () => openReserveModal(courtId, slot, date);
       }
-
       td.appendChild(btn);
       tr.appendChild(td);
     });
-
     body.appendChild(tr);
   });
 }
 
-function mkSlot(cls, html, clickable) {
-  const btn = document.createElement('button');
-  btn.className = `slot-btn ${cls}`;
-  btn.innerHTML = html;
-  if (!clickable) btn.disabled = true;
-  return btn;
+function mkBtn(cls, html, clickable) {
+  const b = document.createElement('button');
+  b.className=`slot-btn ${cls}`; b.innerHTML=html;
+  if (!clickable) b.disabled=true;
+  return b;
 }
+function toMin(t) { const [h,m]=t.split(':').map(Number); return h*60+m; }
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-function slotMinutes(timeStr) {
-  const [h, m] = timeStr.split(':').map(Number);
-  return h * 60 + m;
-}
-
-// ─── RESERVE MODAL ─────────────────────────────────────────
+// ─── MODALS ────────────────────────────────────────────────
 function openReserveModal(courtId, slot, date) {
-  S.pendingReserve = { courtId, slotIndex: slot.index };
-  document.getElementById('r-court').textContent = `Pista ${courtId}`;
-  document.getElementById('r-date').textContent  = fmt(date);
-  document.getElementById('r-time').textContent  = `${slot.start} – ${slot.end}`;
+  S.pendingReserve = {courtId, slotIndex: slot.index};
+  document.getElementById('rv-court').textContent = `Pista ${courtId}`;
+  document.getElementById('rv-date').textContent  = fmtDate(date);
+  document.getElementById('rv-time').textContent  = `${slot.start} – ${slot.end}`;
   document.getElementById('modal-reserve').classList.add('show');
 }
-
 async function confirmReserve() {
-  const { courtId, slotIndex } = S.pendingReserve;
+  const {courtId, slotIndex} = S.pendingReserve;
   closeModals();
   try {
-    await api('POST', '/reservations', {
-      court_id: courtId,
-      date: S.currentDate,
-      slot_index: slotIndex
-    });
-    toast('¡Reserva realizada! ✓', 'success');
+    await api('POST','/reservations',{court_id:courtId, date:S.currentDate, slot_index:slotIndex});
+    toast('¡Reserva realizada! ✓','success');
     loadReservations(S.currentDate);
-  } catch(e) {
-    toast(e.message, 'error');
-  }
+  } catch(e) { toast(e.message,'error'); }
 }
 
-// ─── CANCEL MODAL ──────────────────────────────────────────
 function openCancelModal(res, courtId, slot) {
-  S.pendingCancel = { id: res.id };
-  document.getElementById('c-court').textContent = `Pista ${courtId}`;
-  document.getElementById('c-date').textContent  = fmt(res.date);
-  document.getElementById('c-time').textContent  = `${slot.start} – ${slot.end}`;
+  S.pendingCancel = {id: res.id};
+  document.getElementById('cn-court').textContent = `Pista ${courtId}`;
+  document.getElementById('cn-date').textContent  = fmtDate(res.date);
+  document.getElementById('cn-time').textContent  = `${slot.start} – ${slot.end}`;
   document.getElementById('modal-cancel').classList.add('show');
 }
-
 async function confirmCancel() {
-  const { id } = S.pendingCancel;
   closeModals();
   try {
-    await api('DELETE', `/reservations/${id}`);
-    toast('Reserva eliminada', 'success');
+    await api('DELETE',`/reservations/${S.pendingCancel.id}`);
+    toast('Reserva eliminada','success');
     loadReservations(S.currentDate);
-  } catch(e) {
-    toast(e.message, 'error');
-  }
+  } catch(e) { toast(e.message,'error'); }
+}
+
+function openAddrModal(res, courtId, slot) {
+  document.getElementById('ad-court').textContent = `Pista ${courtId}`;
+  document.getElementById('ad-time').textContent  = `${slot.start} – ${slot.end}`;
+  document.getElementById('ad-calle').textContent = res.calle;
+  document.getElementById('ad-num').textContent   = res.numero;
+  document.getElementById('modal-addr').classList.add('show');
 }
 
 function closeModals() {
   document.querySelectorAll('.overlay').forEach(o => o.classList.remove('show'));
 }
 
-// ─── ADMIN MODAL ───────────────────────────────────────────
+// ─── ADMIN ─────────────────────────────────────────────────
+function switchAdminTab(tab) {
+  document.querySelectorAll('.admin-tab').forEach((b,i) => {
+    b.classList.toggle('active',['config','users','history'][i]===tab);
+  });
+  document.querySelectorAll('.admin-pane').forEach(p => p.classList.remove('active'));
+  document.getElementById(`apane-${tab}`).classList.add('active');
+  if (tab==='users')   loadAdminUsers();
+  if (tab==='history') loadHistory();
+}
+
 async function openAdmin() {
   try {
-    const cfg = await api('GET', '/config');
-    document.getElementById('cfg-hour').value  = cfg.start_hour;
-    document.getElementById('cfg-min').value   = cfg.start_minute;
-    document.getElementById('cfg-slots').value = cfg.slots_count;
-    document.getElementById('admin-error').textContent = '';
+    const cfg = await api('GET','/config');
+    document.getElementById('cfg-h').value = cfg.start_hour;
+    document.getElementById('cfg-m').value = cfg.start_minute;
+    document.getElementById('cfg-s').value = cfg.slots_count;
+    document.getElementById('cfg-err').textContent = '';
     updatePreview();
+    switchAdminTab('config');
     document.getElementById('modal-admin').classList.add('show');
-  } catch(e) {
-    toast(e.message, 'error');
-  }
+  } catch(e) { toast(e.message,'error'); }
 }
 
 function updatePreview() {
-  const h = parseInt(document.getElementById('cfg-hour').value) || 10;
-  const m = parseInt(document.getElementById('cfg-min').value)  || 0;
-  const s = parseInt(document.getElementById('cfg-slots').value) || 8;
-  const list = document.getElementById('preview-list');
-  list.innerHTML = '';
-  for (let i = 0; i < Math.min(s, 16); i++) {
-    const startMin = h * 60 + m + i * 90;
-    const endMin   = startMin + 90;
-    if (endMin > 24 * 60) break;
-    const fmt = (mn) => `${String(Math.floor(mn/60)%24).padStart(2,'0')}:${String(mn%60).padStart(2,'0')}`;
-    const tag = document.createElement('span');
-    tag.className = 'preview-slot-tag';
-    tag.textContent = `${fmt(startMin)}–${fmt(endMin)}`;
-    list.appendChild(tag);
+  const h=parseInt(document.getElementById('cfg-h').value)||10;
+  const m=parseInt(document.getElementById('cfg-m').value)||0;
+  const s=parseInt(document.getElementById('cfg-s').value)||8;
+  const tags = document.getElementById('prev-tags');
+  tags.innerHTML='';
+  for (let i=0; i<Math.min(s,16); i++) {
+    const sm = h*60+m+i*90, em=sm+90;
+    if (em>1440) break;
+    const f=(mn)=>`${String(Math.floor(mn/60)%24).padStart(2,'0')}:${String(mn%60).padStart(2,'0')}`;
+    const tag=document.createElement('span');
+    tag.className='prev-tag'; tag.textContent=`${f(sm)}–${f(em)}`;
+    tags.appendChild(tag);
   }
 }
-
 async function saveConfig() {
-  const h = parseInt(document.getElementById('cfg-hour').value);
-  const m = parseInt(document.getElementById('cfg-min').value);
-  const s = parseInt(document.getElementById('cfg-slots').value);
-  document.getElementById('admin-error').textContent = '';
+  document.getElementById('cfg-err').textContent='';
   try {
-    await api('PUT', '/config', { start_hour: h, start_minute: m, slots_count: s });
-    closeModals();
-    toast('Configuración guardada ✓', 'success');
+    await api('PUT','/config',{
+      start_hour:parseInt(document.getElementById('cfg-h').value),
+      start_minute:parseInt(document.getElementById('cfg-m').value),
+      slots_count:parseInt(document.getElementById('cfg-s').value)
+    });
+    closeModals(); toast('Configuración guardada ✓','success');
     loadReservations(S.currentDate);
-  } catch(e) {
-    document.getElementById('admin-error').textContent = e.message;
-  }
+  } catch(e) { document.getElementById('cfg-err').textContent=e.message; }
+}
+
+// ─── ADMIN USERS ───────────────────────────────────────────
+async function loadAdminUsers() {
+  const list = document.getElementById('users-list');
+  list.innerHTML = '<div class="users-empty"><div class="spinner"></div></div>';
+  try {
+    const users = await api('GET','/admin/users');
+    if (!users.length) { list.innerHTML='<div class="users-empty">No hay usuarios registrados</div>'; return; }
+    list.innerHTML='';
+    users.filter(u => !u.is_admin).forEach(u => {
+      const row = document.createElement('div');
+      const statusClass = u.approved ? 'badge-ok' : 'badge-pending';
+      const statusText  = u.approved ? '✓ Con acceso' : '⏳ Pendiente';
+      row.className = `user-row ${u.approved ? '' : 'pending'}`;
+      row.innerHTML = `
+        <div class="user-info">
+          <strong>${escHtml(u.name)}</strong>
+          <span>@${escHtml(u.username)} · C/ ${escHtml(u.calle)} ${escHtml(u.numero)}</span>
+        </div>
+        <span class="user-badge-status ${statusClass}">${statusText}</span>
+        ${u.approved
+          ? `<button class="btn-approve btn-deny" onclick="setApproval(${u.id},false,this)">Denegar</button>`
+          : `<button class="btn-approve btn-grant" onclick="setApproval(${u.id},true,this)">Dar acceso</button>`
+        }`;
+      list.appendChild(row);
+    });
+  } catch(e) { list.innerHTML=`<div class="users-empty">❌ ${e.message}</div>`; }
+}
+
+async function setApproval(id, approved, btn) {
+  btn.disabled=true; btn.textContent='…';
+  try {
+    await api('PATCH',`/admin/users/${id}/approval`,{approved});
+    toast(approved ? '✓ Acceso concedido' : 'Acceso denegado', approved?'success':'');
+    loadAdminUsers();
+  } catch(e) { toast(e.message,'error'); btn.disabled=false; }
+}
+
+// ─── ADMIN HISTORY ─────────────────────────────────────────
+async function loadHistory() {
+  document.getElementById('hist-body').innerHTML='<tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--g400)"><div class="spinner"></div></td></tr>';
+  try {
+    const data = await api('GET','/admin/history');
+    S.allHistory = data.reservations.map(r => {
+      const cfg = data.config;
+      const sm  = cfg.start_hour*60+cfg.start_minute+r.slot_index*90;
+      const f   = (m)=>`${String(Math.floor(m/60)%24).padStart(2,'0')}:${String(m%60).padStart(2,'0')}`;
+      return {...r, timeStr:`${f(sm)}–${f(sm+90)}`};
+    });
+    renderHistory(S.allHistory);
+  } catch(e) { document.getElementById('hist-body').innerHTML=`<tr><td colspan="5" style="text-align:center;color:var(--red);padding:1rem">❌ ${e.message}</td></tr>`; }
+}
+
+function renderHistory(rows) {
+  const tbody = document.getElementById('hist-body');
+  if (!rows.length) { tbody.innerHTML='<tr><td colspan="5" class="history-empty">No hay reservas</td></tr>'; return; }
+  tbody.innerHTML = rows.map(r=>`
+    <tr>
+      <td>${r.date}</td>
+      <td><span class="court-badge">Pista ${r.court_id}</span></td>
+      <td>${r.timeStr}</td>
+      <td>${escHtml(r.calle)}</td>
+      <td>${escHtml(r.numero)}</td>
+    </tr>`).join('');
+}
+
+function filterHistory() {
+  const f = document.getElementById('hist-date').value;
+  renderHistory(f ? S.allHistory.filter(r=>r.date===f) : S.allHistory);
+}
+function clearHistFilter() {
+  document.getElementById('hist-date').value='';
+  renderHistory(S.allHistory);
 }
 
 // ─── TOAST ─────────────────────────────────────────────────
 let toastTimer;
-function toast(msg, type = '') {
-  const el = document.getElementById('toast');
-  clearTimeout(toastTimer);
-  el.textContent = msg;
-  el.className   = type;
-  el.classList.add('show');
-  toastTimer = setTimeout(() => el.classList.remove('show'), 3000);
+function toast(msg, type='') {
+  const el=document.getElementById('toast');
+  clearTimeout(toastTimer); el.textContent=msg; el.className=type; el.classList.add('show');
+  toastTimer=setTimeout(()=>el.classList.remove('show'),3000);
 }
 
 // ─── CLOSE ON OVERLAY CLICK ────────────────────────────────
-document.querySelectorAll('.overlay').forEach(o => {
-  o.addEventListener('click', e => { if (e.target === o) closeModals(); });
-});
+document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)closeModals()}));
 
-// ─── ADMIN LIVE PREVIEW ────────────────────────────────────
-['cfg-hour','cfg-min','cfg-slots'].forEach(id => {
-  document.getElementById(id)?.addEventListener('input', updatePreview);
-});
+// ─── LIVE PREVIEW ──────────────────────────────────────────
+['cfg-h','cfg-m','cfg-s'].forEach(id=>document.getElementById(id)?.addEventListener('input',updatePreview));
 
 // ─── ENTER KEY ─────────────────────────────────────────────
-document.getElementById('login-pass').addEventListener('keydown', e => {
-  if (e.key === 'Enter') doLogin();
-});
-document.getElementById('reg-pass').addEventListener('keydown', e => {
-  if (e.key === 'Enter') doRegister();
-});
+document.getElementById('l-pass').addEventListener('keydown',e=>e.key==='Enter'&&doLogin());
+document.getElementById('r-pass').addEventListener('keydown',e=>e.key==='Enter'&&doRegister());
 
 // ─── INIT ──────────────────────────────────────────────────
 (function init() {
   const token = localStorage.getItem('padel_token');
   const user  = localStorage.getItem('padel_user');
   if (token && user) {
-    try {
-      S.token = token;
-      S.user  = JSON.parse(user);
-      showApp();
-      return;
-    } catch {}
+    try { S.token=token; S.user=JSON.parse(user); showApp(); return; } catch {}
   }
-  document.getElementById('auth-screen').style.display = 'flex';
+  document.getElementById('auth-screen').style.display='flex';
 })();
 </script>
 </body>
