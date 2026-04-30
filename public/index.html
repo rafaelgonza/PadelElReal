@@ -465,7 +465,7 @@
       </div>
       <table class="history-table">
         <thead><tr>
-          <th>Fecha</th><th>Pista</th><th>Horario</th><th>Vecino (Calle)</th><th>Nº</th>
+          <th>Fecha</th><th>Pista</th><th>Horario</th><th>Nombre</th><th>Vecino (Calle)</th><th>Nº</th>
         </tr></thead>
         <tbody id="hist-body"></tbody>
       </table>
@@ -827,7 +827,7 @@ async function setApproval(id, approved, btn) {
 
 // ─── ADMIN HISTORY ─────────────────────────────────────────
 async function loadHistory() {
-  document.getElementById('hist-body').innerHTML='<tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--g400)"><div class="spinner"></div></td></tr>';
+  document.getElementById('hist-body').innerHTML='<tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--g400)"><div class="spinner"></div></td></tr>';
   try {
     const data = await api('GET','/admin/history');
     S.allHistory = data.reservations.map(r => {
@@ -837,17 +837,18 @@ async function loadHistory() {
       return {...r, timeStr:`${f(sm)}–${f(sm+90)}`};
     });
     renderHistory(S.allHistory);
-  } catch(e) { document.getElementById('hist-body').innerHTML=`<tr><td colspan="5" style="text-align:center;color:var(--red);padding:1rem">❌ ${e.message}</td></tr>`; }
+  } catch(e) { document.getElementById('hist-body').innerHTML=`<tr><td colspan="6" style="text-align:center;color:var(--red);padding:1rem">❌ ${e.message}</td></tr>`; }
 }
 
 function renderHistory(rows) {
   const tbody = document.getElementById('hist-body');
-  if (!rows.length) { tbody.innerHTML='<tr><td colspan="5" class="history-empty">No hay reservas</td></tr>'; return; }
+  if (!rows.length) { tbody.innerHTML='<tr><td colspan="6" class="history-empty">No hay reservas</td></tr>'; return; }
   tbody.innerHTML = rows.map(r=>`
     <tr>
       <td>${r.date}</td>
       <td><span class="court-badge">Pista ${r.court_id}</span></td>
       <td>${r.timeStr}</td>
+      <td>${escHtml(r.user_name)}</td>
       <td>${escHtml(r.calle)}</td>
       <td>${escHtml(r.numero)}</td>
     </tr>`).join('');
