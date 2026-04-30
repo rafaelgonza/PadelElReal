@@ -174,26 +174,57 @@
     .btn-mdel:hover{background:#b91c1c}
 
     /* ADMIN MODAL */
-    .admin-modal{max-width:700px}
+    .admin-modal{max-width:900px}
     .admin-tabs{display:flex;gap:4px;background:var(--g100);border-radius:var(--r);padding:4px;margin-bottom:1.5rem}
     .admin-tab{flex:1;padding:.5rem .75rem;border:none;background:transparent;border-radius:8px;font-size:.82rem;
       font-weight:600;color:var(--g400);transition:all .2s;white-space:nowrap}
     .admin-tab.active{background:var(--white);color:var(--green);box-shadow:var(--sh)}
     .admin-pane{display:none}.admin-pane.active{display:block;animation:fadeIn .2s}
-    .config-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.875rem}
+    .config-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.75rem}
     .cfg-item label{display:block;font-size:.75rem;font-weight:600;color:var(--g600);
       text-transform:uppercase;letter-spacing:.4px;margin-bottom:.35rem}
     .cfg-item select,.cfg-item input[type=number]{width:100%;padding:.55rem .75rem;border:2px solid var(--g200);
       border-radius:var(--r);font-size:.9rem;font-family:var(--fb);outline:none;transition:border-color .2s}
     .cfg-item select:focus,.cfg-item input:focus{border-color:var(--green)}
+    .season-section{margin-bottom:1rem;padding:1rem;border-radius:var(--r);border:2px solid var(--g200)}
+    .season-section.active-season{border-color:var(--green);background:var(--green-ll)}
+    .season-section.summer{border-color:#f59e0b;background:#fffbeb}
+    .season-section.summer.active-season{border-color:#d97706;background:#fef3c7}
+    .season-label{display:flex;align-items:center;gap:.5rem;font-family:var(--fh);font-size:1rem;font-weight:700;
+      letter-spacing:.5px;text-transform:uppercase;color:var(--g600);margin-bottom:.75rem}
+    .season-badge{font-size:.7rem;background:var(--green);color:white;border-radius:100px;padding:.2rem .6rem;font-family:var(--fb);font-weight:700;text-transform:none;letter-spacing:0}
+    .season-badge.summer-badge{background:#d97706}
+    .season-dates-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-top:.875rem;
+      padding-top:.875rem;border-top:1px solid var(--g200)}
     .preview-box{background:var(--green-l);border-radius:var(--r);padding:.875rem 1rem;margin-top:.875rem}
     .preview-box p{font-size:.78rem;font-weight:600;color:var(--green-d);margin-bottom:.375rem}
     .preview-tags{display:flex;flex-wrap:wrap;gap:.375rem}
     .prev-tag{background:var(--green);color:white;border-radius:6px;padding:.2rem .5rem;font-size:.72rem;font-weight:600}
+    .summer-tag{background:#d97706!important}
     .admin-err{color:var(--red);font-size:.875rem;margin-top:.5rem;min-height:1.2em}
 
     /* USER LIST */
-    .users-list{display:flex;flex-direction:column;gap:.5rem;max-height:360px;overflow-y:auto}
+    .user-search{width:100%;padding:.6rem 1rem;border:2px solid var(--g200);border-radius:var(--r);
+      font-size:.9rem;outline:none;margin-bottom:.75rem;transition:border-color .2s}
+    .user-search:focus{border-color:var(--green)}
+    .users-list{display:flex;flex-direction:column;gap:.5rem;max-height:400px;overflow-y:auto}
+    .user-edit-form{background:var(--g50);border-radius:var(--r);padding:.875rem;margin-top:.5rem;
+      border:1.5px solid var(--g200);display:none}
+    .user-edit-form.open{display:block;animation:fadeIn .2s}
+    .edit-grid{display:grid;grid-template-columns:1fr 1fr;gap:.625rem;margin-bottom:.625rem}
+    .edit-field label{display:block;font-size:.72rem;font-weight:600;color:var(--g600);
+      text-transform:uppercase;letter-spacing:.4px;margin-bottom:.3rem}
+    .edit-field input{width:100%;padding:.5rem .75rem;border:2px solid var(--g200);border-radius:8px;
+      font-size:.85rem;outline:none;transition:border-color .2s}
+    .edit-field input:focus{border-color:var(--green)}
+    .edit-actions{display:flex;gap:.5rem;margin-top:.625rem}
+    .btn-edit-save{flex:1;padding:.5rem;border:none;border-radius:8px;background:var(--green);color:white;
+      font-size:.82rem;font-weight:700;font-family:var(--fh);letter-spacing:.3px;transition:background .2s}
+    .btn-edit-save:hover{background:var(--green-d)}
+    .btn-edit-cancel{padding:.5rem .875rem;border:2px solid var(--g200);border-radius:8px;background:white;
+      font-size:.82rem;font-weight:600;color:var(--g600);transition:all .2s}
+    .btn-edit-cancel:hover{border-color:var(--g400)}
+    .edit-err{font-size:.78rem;color:var(--red);margin-top:.375rem;min-height:1em}
     .user-row{display:flex;align-items:center;gap:.75rem;padding:.75rem 1rem;background:var(--g50);
       border-radius:var(--r);border:1.5px solid var(--g200)}
     .user-row.pending{border-color:#fcd34d;background:#fffbeb}
@@ -216,7 +247,7 @@
     .history-filter input[type=date]{padding:.4rem .75rem;border:2px solid var(--g200);border-radius:var(--r);
       font-size:.85rem;font-family:var(--fb);outline:none}
     .history-filter input:focus{border-color:var(--green)}
-    .history-table{width:100%;border-collapse:collapse;font-size:.82rem;max-height:340px;display:block;overflow-y:auto}
+    .history-table{width:100%;border-collapse:collapse;font-size:.82rem;max-height:420px;display:block;overflow-y:auto}
     .history-table thead{display:table;width:100%}
     .history-table tbody{display:table;width:100%}
     .history-table th{background:var(--g100);color:var(--g600);padding:.5rem .75rem;text-align:left;
@@ -423,22 +454,71 @@
 
     <!-- CONFIG -->
     <div id="apane-config" class="admin-pane active">
-      <div class="config-grid">
-        <div class="cfg-item"><label>Hora inicio</label>
-          <select id="cfg-h">
-            <option value="6">06:00</option><option value="7">07:00</option><option value="8">08:00</option>
-            <option value="9">09:00</option><option value="10" selected>10:00</option><option value="11">11:00</option>
-            <option value="12">12:00</option><option value="13">13:00</option><option value="14">14:00</option>
-          </select>
+
+      <!-- INVIERNO -->
+      <div class="season-section" id="winter-section">
+        <div class="season-label">❄️ Horario Invierno <span class="season-badge" id="winter-active-badge" style="display:none">Activo ahora</span></div>
+        <div class="config-grid">
+          <div class="cfg-item"><label>Hora inicio</label>
+            <select id="cfg-wh">
+              <option value="6">06:00</option><option value="7">07:00</option><option value="8">08:00</option>
+              <option value="9">09:00</option><option value="10" selected>10:00</option><option value="11">11:00</option>
+              <option value="12">12:00</option><option value="13">13:00</option><option value="14">14:00</option>
+            </select>
+          </div>
+          <div class="cfg-item"><label>Minutos</label>
+            <select id="cfg-wm"><option value="0" selected>:00</option><option value="30">:30</option></select>
+          </div>
+          <div class="cfg-item"><label>Nº turnos</label>
+            <input id="cfg-ws" type="number" min="1" max="16" value="7"/>
+          </div>
+          <div class="cfg-item" style="align-self:end">
+            <div class="preview-box" style="margin-top:0;padding:.5rem .75rem">
+              <p style="margin-bottom:.25rem">Vista previa:</p>
+              <div class="preview-tags" id="prev-winter"></div>
+            </div>
+          </div>
         </div>
-        <div class="cfg-item"><label>Minutos</label>
-          <select id="cfg-m"><option value="0" selected>:00</option><option value="30">:30</option></select>
-        </div>
-        <div class="cfg-item"><label>Nº turnos</label>
-          <input id="cfg-s" type="number" min="1" max="16" value="8"/>
+        <div class="season-dates-grid">
+          <div class="cfg-item"><label>Empieza el día</label>
+            <input id="cfg-winter-day" type="number" min="1" max="31" value="1" placeholder="Día"/></div>
+          <div class="cfg-item"><label>De mes (1-12)</label>
+            <input id="cfg-winter-month" type="number" min="1" max="12" value="10" placeholder="Mes"/></div>
         </div>
       </div>
-      <div class="preview-box"><p>Vista previa de horarios:</p><div class="preview-tags" id="prev-tags"></div></div>
+
+      <!-- VERANO -->
+      <div class="season-section summer" id="summer-section">
+        <div class="season-label">☀️ Horario Verano <span class="season-badge summer-badge" id="summer-active-badge" style="display:none">Activo ahora</span></div>
+        <div class="config-grid">
+          <div class="cfg-item"><label>Hora inicio</label>
+            <select id="cfg-sh">
+              <option value="6">06:00</option><option value="7">07:00</option><option value="8">08:00</option>
+              <option value="9" selected>09:00</option><option value="10">10:00</option><option value="11">11:00</option>
+              <option value="12">12:00</option><option value="13">13:00</option><option value="14">14:00</option>
+            </select>
+          </div>
+          <div class="cfg-item"><label>Minutos</label>
+            <select id="cfg-sm"><option value="0" selected>:00</option><option value="30">:30</option></select>
+          </div>
+          <div class="cfg-item"><label>Nº turnos</label>
+            <input id="cfg-ss" type="number" min="1" max="16" value="9"/>
+          </div>
+          <div class="cfg-item" style="align-self:end">
+            <div class="preview-box" style="margin-top:0;padding:.5rem .75rem;background:var(--amber-l)">
+              <p style="margin-bottom:.25rem;color:#92400e">Vista previa:</p>
+              <div class="preview-tags" id="prev-summer"></div>
+            </div>
+          </div>
+        </div>
+        <div class="season-dates-grid">
+          <div class="cfg-item"><label>Empieza el día</label>
+            <input id="cfg-summer-day" type="number" min="1" max="31" value="1" placeholder="Día"/></div>
+          <div class="cfg-item"><label>De mes (1-12)</label>
+            <input id="cfg-summer-month" type="number" min="1" max="12" value="6" placeholder="Mes"/></div>
+        </div>
+      </div>
+
       <p class="admin-err" id="cfg-err"></p>
       <div class="modal-actions" style="margin-top:1rem">
         <button class="btn-mc" onclick="closeModals()">Cerrar</button>
@@ -448,6 +528,7 @@
 
     <!-- USERS -->
     <div id="apane-users" class="admin-pane">
+      <input type="text" class="user-search" id="user-search" placeholder="🔍 Buscar por nombre, usuario o dirección…" oninput="filterUsers()"/>
       <div class="users-list" id="users-list">
         <div class="users-empty"><div class="spinner"></div></div>
       </div>
@@ -465,7 +546,7 @@
       </div>
       <table class="history-table">
         <thead><tr>
-          <th>Fecha</th><th>Pista</th><th>Horario</th><th>Nombre</th><th>Vecino (Calle)</th><th>Nº</th>
+          <th>Reservado el</th><th>Fecha pista</th><th>Pista</th><th>Horario</th><th>Nombre</th><th>Calle</th><th>Nº</th>
         </tr></thead>
         <tbody id="hist-body"></tbody>
       </table>
@@ -765,9 +846,24 @@ function switchAdminTab(tab) {
 async function openAdmin() {
   try {
     const cfg = await api('GET','/config');
-    document.getElementById('cfg-h').value = cfg.start_hour;
-    document.getElementById('cfg-m').value = cfg.start_minute;
-    document.getElementById('cfg-s').value = cfg.slots_count;
+    // Winter
+    document.getElementById('cfg-wh').value = cfg.winter_start_hour;
+    document.getElementById('cfg-wm').value = cfg.winter_start_minute;
+    document.getElementById('cfg-ws').value = cfg.winter_slots_count;
+    document.getElementById('cfg-winter-day').value   = cfg.winter_start_day;
+    document.getElementById('cfg-winter-month').value = cfg.winter_start_month;
+    // Summer
+    document.getElementById('cfg-sh').value = cfg.summer_start_hour;
+    document.getElementById('cfg-sm').value = cfg.summer_start_minute;
+    document.getElementById('cfg-ss').value = cfg.summer_slots_count;
+    document.getElementById('cfg-summer-day').value   = cfg.summer_start_day;
+    document.getElementById('cfg-summer-month').value = cfg.summer_start_month;
+    // Mark active season
+    const isWinter = cfg.active_season === 'winter';
+    document.getElementById('winter-section').classList.toggle('active-season', isWinter);
+    document.getElementById('summer-section').classList.toggle('active-season', !isWinter);
+    document.getElementById('winter-active-badge').style.display = isWinter ? 'inline' : 'none';
+    document.getElementById('summer-active-badge').style.display = !isWinter ? 'inline' : 'none';
     document.getElementById('cfg-err').textContent = '';
     updatePreview();
     switchAdminTab('config');
@@ -775,28 +871,46 @@ async function openAdmin() {
   } catch(e) { toast(e.message,'error'); }
 }
 
-function updatePreview() {
-  const h=parseInt(document.getElementById('cfg-h').value)||10;
-  const m=parseInt(document.getElementById('cfg-m').value)||0;
-  const s=parseInt(document.getElementById('cfg-s').value)||8;
-  const tags = document.getElementById('prev-tags');
-  tags.innerHTML='';
+function buildPreviewTags(containerId, h, m, s, tagClass) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  el.innerHTML='';
   for (let i=0; i<Math.min(s,16); i++) {
-    const sm = h*60+m+i*90, em=sm+90;
+    const sm=h*60+m+i*90, em=sm+90;
     if (em>1440) break;
     const f=(mn)=>`${String(Math.floor(mn/60)%24).padStart(2,'0')}:${String(mn%60).padStart(2,'0')}`;
     const tag=document.createElement('span');
-    tag.className='prev-tag'; tag.textContent=`${f(sm)}–${f(em)}`;
-    tags.appendChild(tag);
+    tag.className=`prev-tag ${tagClass||''}`; tag.textContent=`${f(sm)}–${f(em)}`;
+    el.appendChild(tag);
   }
 }
+
+function updatePreview() {
+  buildPreviewTags('prev-winter',
+    parseInt(document.getElementById('cfg-wh').value)||10,
+    parseInt(document.getElementById('cfg-wm').value)||0,
+    parseInt(document.getElementById('cfg-ws').value)||7);
+  buildPreviewTags('prev-summer',
+    parseInt(document.getElementById('cfg-sh').value)||9,
+    parseInt(document.getElementById('cfg-sm').value)||0,
+    parseInt(document.getElementById('cfg-ss').value)||9,
+    'summer-tag');
+}
+
 async function saveConfig() {
   document.getElementById('cfg-err').textContent='';
   try {
     await api('PUT','/config',{
-      start_hour:parseInt(document.getElementById('cfg-h').value),
-      start_minute:parseInt(document.getElementById('cfg-m').value),
-      slots_count:parseInt(document.getElementById('cfg-s').value)
+      winter_start_hour:   parseInt(document.getElementById('cfg-wh').value),
+      winter_start_minute: parseInt(document.getElementById('cfg-wm').value),
+      winter_slots_count:  parseInt(document.getElementById('cfg-ws').value),
+      winter_start_day:    parseInt(document.getElementById('cfg-winter-day').value),
+      winter_start_month:  parseInt(document.getElementById('cfg-winter-month').value),
+      summer_start_hour:   parseInt(document.getElementById('cfg-sh').value),
+      summer_start_minute: parseInt(document.getElementById('cfg-sm').value),
+      summer_slots_count:  parseInt(document.getElementById('cfg-ss').value),
+      summer_start_day:    parseInt(document.getElementById('cfg-summer-day').value),
+      summer_start_month:  parseInt(document.getElementById('cfg-summer-month').value),
     });
     closeModals(); toast('Configuración guardada ✓','success');
     loadReservations(S.currentDate);
@@ -804,31 +918,97 @@ async function saveConfig() {
 }
 
 // ─── ADMIN USERS ───────────────────────────────────────────
+let allAdminUsers = [];
+
 async function loadAdminUsers() {
   const list = document.getElementById('users-list');
+  document.getElementById('user-search').value = '';
   list.innerHTML = '<div class="users-empty"><div class="spinner"></div></div>';
   try {
-    const users = await api('GET','/admin/users');
-    if (!users.length) { list.innerHTML='<div class="users-empty">No hay usuarios registrados</div>'; return; }
-    list.innerHTML='';
-    users.filter(u => !u.is_admin).forEach(u => {
-      const row = document.createElement('div');
-      const statusClass = u.approved ? 'badge-ok' : 'badge-pending';
-      const statusText  = u.approved ? '✓ Con acceso' : '⏳ Pendiente';
-      row.className = `user-row ${u.approved ? '' : 'pending'}`;
-      row.innerHTML = `
+    allAdminUsers = (await api('GET','/admin/users')).filter(u => !u.is_admin);
+    renderUserList(allAdminUsers);
+  } catch(e) { list.innerHTML=`<div class="users-empty">❌ ${e.message}</div>`; }
+}
+
+function filterUsers() {
+  const q = document.getElementById('user-search').value.toLowerCase().trim();
+  if (!q) return renderUserList(allAdminUsers);
+  renderUserList(allAdminUsers.filter(u =>
+    u.name.toLowerCase().includes(q) ||
+    u.username.toLowerCase().includes(q) ||
+    u.calle.toLowerCase().includes(q) ||
+    u.numero.toLowerCase().includes(q)
+  ));
+}
+
+function renderUserList(users) {
+  const list = document.getElementById('users-list');
+  if (!users.length) { list.innerHTML='<div class="users-empty">No se encontraron usuarios</div>'; return; }
+  list.innerHTML='';
+  users.forEach(u => {
+    const wrap = document.createElement('div');
+    wrap.style.marginBottom='.25rem';
+    const statusClass = u.approved ? 'badge-ok' : 'badge-pending';
+    const statusText  = u.approved ? '✓ Con acceso' : '⏳ Pendiente';
+    wrap.innerHTML = `
+      <div class="user-row ${u.approved?'':'pending'}" style="cursor:pointer" onclick="toggleUserEdit(${u.id},this)">
         <div class="user-info">
           <strong>${escHtml(u.name)}</strong>
           <span>@${escHtml(u.username)} · C/ ${escHtml(u.calle)} ${escHtml(u.numero)}</span>
         </div>
         <span class="user-badge-status ${statusClass}">${statusText}</span>
         ${u.approved
-          ? `<button class="btn-approve btn-deny" onclick="setApproval(${u.id},false,this)">Denegar</button>`
-          : `<button class="btn-approve btn-grant" onclick="setApproval(${u.id},true,this)">Dar acceso</button>`
-        }`;
-      list.appendChild(row);
-    });
-  } catch(e) { list.innerHTML=`<div class="users-empty">❌ ${e.message}</div>`; }
+          ? `<button class="btn-approve btn-deny" onclick="event.stopPropagation();setApproval(${u.id},false,this)">Denegar</button>`
+          : `<button class="btn-approve btn-grant" onclick="event.stopPropagation();setApproval(${u.id},true,this)">Dar acceso</button>`
+        }
+      </div>
+      <div class="user-edit-form" id="edit-form-${u.id}">
+        <div class="edit-grid">
+          <div class="edit-field"><label>Nombre completo</label>
+            <input id="ef-name-${u.id}" type="text" value="${escHtml(u.name)}"/></div>
+          <div class="edit-field"><label>Usuario</label>
+            <input id="ef-user-${u.id}" type="text" value="${escHtml(u.username)}"/></div>
+          <div class="edit-field"><label>Nueva contraseña</label>
+            <input id="ef-pass-${u.id}" type="password" placeholder="Dejar vacío para no cambiar"/></div>
+          <div class="edit-field"><label>Calle</label>
+            <input id="ef-calle-${u.id}" type="text" value="${escHtml(u.calle)}" disabled style="opacity:.6"/></div>
+        </div>
+        <p class="edit-err" id="ef-err-${u.id}"></p>
+        <div class="edit-actions">
+          <button class="btn-edit-cancel" onclick="toggleUserEdit(${u.id},null)">Cancelar</button>
+          <button class="btn-edit-save" onclick="saveUserEdit(${u.id})">💾 Guardar cambios</button>
+        </div>
+      </div>`;
+    list.appendChild(wrap);
+  });
+}
+
+function toggleUserEdit(id, rowEl) {
+  const form = document.getElementById(`edit-form-${id}`);
+  const isOpen = form.classList.contains('open');
+  // Close all open forms first
+  document.querySelectorAll('.user-edit-form.open').forEach(f => f.classList.remove('open'));
+  if (!isOpen) form.classList.add('open');
+}
+
+async function saveUserEdit(id) {
+  const name     = document.getElementById(`ef-name-${id}`).value.trim();
+  const username = document.getElementById(`ef-user-${id}`).value.trim();
+  const password = document.getElementById(`ef-pass-${id}`).value;
+  const errEl    = document.getElementById(`ef-err-${id}`);
+  errEl.textContent = '';
+  if (!name || !username) { errEl.textContent='Nombre y usuario son obligatorios'; return; }
+
+  const changed = password
+    ? `nombre, usuario y contraseña`
+    : `nombre y usuario`;
+  if (!confirm(`¿Confirmas que quieres cambiar los datos de este usuario (${changed})?`)) return;
+
+  try {
+    await api('PATCH',`/admin/users/${id}`, { name, username, password: password || undefined });
+    toast('Usuario actualizado ✓','success');
+    loadAdminUsers();
+  } catch(e) { errEl.textContent = e.message; }
 }
 
 async function setApproval(id, approved, btn) {
@@ -842,24 +1022,32 @@ async function setApproval(id, approved, btn) {
 
 // ─── ADMIN HISTORY ─────────────────────────────────────────
 async function loadHistory() {
-  document.getElementById('hist-body').innerHTML='<tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--g400)"><div class="spinner"></div></td></tr>';
+  document.getElementById('hist-body').innerHTML='<tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--g400)"><div class="spinner"></div></td></tr>';
   try {
     const data = await api('GET','/admin/history');
     S.allHistory = data.reservations.map(r => {
       const cfg = data.config;
-      const sm  = cfg.start_hour*60+cfg.start_minute+r.slot_index*90;
-      const f   = (m)=>`${String(Math.floor(m/60)%24).padStart(2,'0')}:${String(m%60).padStart(2,'0')}`;
-      return {...r, timeStr:`${f(sm)}–${f(sm+90)}`};
+      // Determine slot time using the config for that date's season
+      const now = new Date().toISOString().split('T')[0];
+      // Use winter config as fallback for historical display
+      const sh = cfg.winter_start_hour || cfg.start_hour || 10;
+      const sm2 = cfg.winter_start_minute || cfg.start_minute || 0;
+      const startMin = sh*60+sm2+r.slot_index*90;
+      const f=(mn)=>`${String(Math.floor(mn/60)%24).padStart(2,'0')}:${String(mn%60).padStart(2,'0')}`;
+      // Format created_at nicely
+      const ca = r.created_at ? r.created_at.replace('T',' ').slice(0,16) : '—';
+      return {...r, timeStr:`${f(startMin)}–${f(startMin+90)}`, createdFmt: ca};
     });
     renderHistory(S.allHistory);
-  } catch(e) { document.getElementById('hist-body').innerHTML=`<tr><td colspan="6" style="text-align:center;color:var(--red);padding:1rem">❌ ${e.message}</td></tr>`; }
+  } catch(e) { document.getElementById('hist-body').innerHTML=`<tr><td colspan="7" style="text-align:center;color:var(--red);padding:1rem">❌ ${e.message}</td></tr>`; }
 }
 
 function renderHistory(rows) {
   const tbody = document.getElementById('hist-body');
-  if (!rows.length) { tbody.innerHTML='<tr><td colspan="6" class="history-empty">No hay reservas</td></tr>'; return; }
+  if (!rows.length) { tbody.innerHTML='<tr><td colspan="7" class="history-empty">No hay reservas</td></tr>'; return; }
   tbody.innerHTML = rows.map(r=>`
     <tr>
+      <td style="white-space:nowrap;font-size:.78rem">${escHtml(r.createdFmt)}</td>
       <td>${r.date}</td>
       <td><span class="court-badge">Pista ${r.court_id}</span></td>
       <td>${r.timeStr}</td>
@@ -890,7 +1078,7 @@ function toast(msg, type='') {
 document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)closeModals()}));
 
 // ─── LIVE PREVIEW ──────────────────────────────────────────
-['cfg-h','cfg-m','cfg-s'].forEach(id=>document.getElementById(id)?.addEventListener('input',updatePreview));
+['cfg-wh','cfg-wm','cfg-ws','cfg-sh','cfg-sm','cfg-ss'].forEach(id=>document.getElementById(id)?.addEventListener('input',updatePreview));
 
 // ─── ENTER KEY ─────────────────────────────────────────────
 document.getElementById('l-pass').addEventListener('keydown',e=>e.key==='Enter'&&doLogin());
