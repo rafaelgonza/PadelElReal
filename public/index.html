@@ -144,13 +144,25 @@
     .slot-past{background:var(--g50);color:#d1d5db;cursor:default}
     /* Light indicator */
     .light-badge{display:inline-flex;align-items:center;gap:.25rem;font-size:.68rem;font-weight:700;
-      padding:.15rem .45rem;border-radius:100px;margin-top:.25rem;white-space:nowrap}
+      padding:.15rem .45rem;border-radius:100px;margin-top:.2rem;white-space:nowrap}
     .light-needed{background:linear-gradient(135deg,#1e1b4b,#312e81);color:#c7d2fe}
     .light-dusk{background:linear-gradient(135deg,#7c2d12,#c2410c);color:#fed7aa}
-    .time-cell-inner{display:flex;flex-direction:column;gap:.1rem}
+    .time-cell-inner{display:flex;flex-direction:column;gap:.15rem}
     /* Row tint for night slots */
     tr.needs-light td{background:rgba(49,46,129,.03)}
     tr.needs-light .time-cell{background:rgba(49,46,129,.07)!important}
+    /* Weather widget */
+    .weather-strip{display:flex;align-items:center;gap:.35rem;margin-top:.15rem;
+      background:rgba(255,255,255,.7);border-radius:6px;padding:.2rem .45rem;
+      border:1px solid var(--g200);width:fit-content}
+    .weather-emoji{font-size:.85rem;line-height:1}
+    .weather-temp{font-size:.78rem;font-weight:700;color:var(--g900)}
+    .weather-rain{font-size:.72rem;color:var(--blue);font-weight:600}
+    .weather-rain.heavy{color:var(--red)}
+    .weather-loading{font-size:.68rem;color:var(--g400);font-style:italic}
+    /* Rain row tint */
+    tr.heavy-rain td{background:rgba(29,78,216,.04)!important}
+    tr.heavy-rain .time-cell{background:rgba(29,78,216,.08)!important}
     .slot-locked{background:var(--amber-l);color:#92400e;cursor:default;font-size:.78rem}
 
     /* MODALS */
@@ -385,6 +397,7 @@
       <div class="legend-item"><div class="legend-dot" style="background:var(--blue-l);border:1.5px solid var(--blue)"></div><span>Tu reserva</span></div>
       <div class="legend-item"><div class="legend-dot" style="background:var(--g100);border:1.5px solid var(--g200)"></div><span>Ocupada</span></div>
       <div class="legend-item"><div class="legend-dot" style="background:var(--amber-l);border:1.5px solid var(--amber)"></div><span>Turno bloqueado</span></div>
+      <div class="legend-item"><span style="font-size:.8rem">🌤️ Previsión del tiempo en Espartinas · <span style="color:var(--red)">💧% = prob. lluvia</span></span></div>
     </div>
     <div class="grid-card">
       <table class="grid-table">
@@ -574,7 +587,7 @@
 <script>
 // ─── STATE ─────────────────────────────────────────────────
 const S = { token:null, user:null, currentDate:null, slots:[], reservations:[], config:null,
-  pendingReserve:null, pendingCancel:null, allHistory:[] };
+  pendingReserve:null, pendingCancel:null, allHistory:[], weatherCache:{} };
 
 const MONTHS = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
 const DAYS   = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
@@ -714,13 +727,72 @@ function selectDate(date) {
 async function loadReservations(date) {
   document.getElementById('grid-body').innerHTML = `<tr class="loading-row"><td colspan="3"><div class="spinner"></div><p>Cargando…</p></td></tr>`;
   try {
-    const data = await api('GET',`/reservations?date=${date}`);
+    const [data] = await Promise.all([
+      api('GET',`/reservations?date=${date}`),
+      fetchWeather(date)
+    ]);
     S.slots=data.slots; S.reservations=data.reservations; S.config=data.config;
     renderGrid(date, data.today, data.nowMinutes);
   } catch(e) {
     if (e.message==='PENDIENTE_APROBACION') { doLogout(); return; }
     document.getElementById('grid-body').innerHTML = `<tr class="loading-row"><td colspan="3">❌ ${e.message}</td></tr>`;
   }
+}
+
+// ─── WEATHER (Open-Meteo, Espartinas 37.38°N 6.09°W) ───────
+async function fetchWeather(date) {
+  if (S.weatherCache[date]) return; // already cached
+  try {
+    const url = 'https://api.open-meteo.com/v1/forecast' +
+      '?latitude=37.38&longitude=-6.09' +
+      '&hourly=temperature_2m,precipitation_probability,weather_code' +
+      '&timezone=Europe%2FMadrid&forecast_days=3';
+    const res  = await fetch(url);
+    const json = await res.json();
+    // Build a map: "YYYY-MM-DDTHH:00" → { temp, rain, code }
+    const map = {};
+    json.hourly.time.forEach((t, i) => {
+      map[t] = {
+        temp: Math.round(json.hourly.temperature_2m[i]),
+        rain: json.hourly.precipitation_probability[i],
+        code: json.hourly.weather_code[i]
+      };
+    });
+    // Store keyed by date so we can access by date+hour later
+    S.weatherCache[date] = map;
+    // Also store for the other 2 dates that come in the same response
+    Object.keys(map).forEach(t => {
+      const d = t.slice(0,10);
+      if (!S.weatherCache[d]) S.weatherCache[d] = {};
+      S.weatherCache[d][t] = map[t];
+    });
+  } catch(e) {
+    console.warn('Weather fetch failed:', e.message);
+  }
+}
+
+// Get weather for a slot: use the hour at the midpoint of the slot
+function getWeatherForSlot(date, startMin) {
+  const cache = S.weatherCache[date];
+  if (!cache) return null;
+  // midpoint hour of 90-min slot
+  const midMin  = startMin + 45;
+  const hour    = Math.floor(midMin / 60) % 24;
+  const key     = `${date}T${String(hour).padStart(2,'0')}:00`;
+  return cache[key] || null;
+}
+
+// Weather code → emoji + label
+function weatherEmoji(code) {
+  if (code === 0)            return '☀️';
+  if (code <= 2)             return '🌤️';
+  if (code === 3)            return '☁️';
+  if (code <= 49)            return '🌫️';
+  if (code <= 67)            return '🌧️';
+  if (code <= 77)            return '❄️';
+  if (code <= 82)            return '🌦️';
+  if (code <= 99)            return '⛈️';
+  return '🌡️';
 }
 
 // ─── RENDER ────────────────────────────────────────────────
@@ -746,6 +818,16 @@ function renderGrid(date, today, nowMin) {
     const tr = document.createElement('tr');
     if (lightInfo.needsLight) tr.classList.add('needs-light');
 
+    // Weather for this slot
+    const wx = getWeatherForSlot(date, slotStartMin);
+    let weatherHtml = '';
+    if (wx) {
+      const rainClass = wx.rain >= 60 ? 'weather-rain heavy' : 'weather-rain';
+      const rainStr   = wx.rain > 0 ? `<span class="${rainClass}">💧${wx.rain}%</span>` : '';
+      weatherHtml = `<div class="weather-strip"><span class="weather-emoji">${weatherEmoji(wx.code)}</span><span class="weather-temp">${wx.temp}°C</span>${rainStr}</div>`;
+      if (wx.rain >= 60) tr.classList.add('heavy-rain');
+    }
+
     const tdT = document.createElement('td');
     tdT.className='time-cell';
     let lightBadge = '';
@@ -754,7 +836,7 @@ function renderGrid(date, today, nowMin) {
     } else if (lightInfo.needsLight) {
       lightBadge = `<span class="light-badge light-needed">💡 Luz artif.</span>`;
     }
-    tdT.innerHTML=`<div class="time-cell-inner"><div><span class="time-main">${slot.start}</span><span class="time-end">hasta ${slot.end}</span></div>${lightBadge}</div>`;
+    tdT.innerHTML=`<div class="time-cell-inner"><div><span class="time-main">${slot.start}</span><span class="time-end">hasta ${slot.end}</span></div>${weatherHtml}${lightBadge}</div>`;
     tr.appendChild(tdT);
 
     const slotMin = toMin(slot.start);
