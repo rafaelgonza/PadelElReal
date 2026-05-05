@@ -528,6 +528,90 @@ app.get('/api/admin/history', authenticate, adminOnly, (req, res) => {
   res.json({ reservations: rows, config: getFullConfig() });
 });
 
+// ─── ADMIN: EXPORTAR USUARIOS ────────────────────────────────────────────────
+app.get('/api/admin/export-users', authenticate, adminOnly, (req, res) => {
+  const users = db.prepare(
+    'SELECT name,username,calle,numero,approved,created_at FROM users WHERE is_admin=0 ORDER BY name ASC'
+  ).all();
+
+  // Build CSV
+  const header = 'Nombre,Usuario,Calle,Numero,Acceso,Fecha_registro';
+  const rows   = users.map(u =>
+    [u.name, u.username, u.calle, u.numero, u.approved ? 'si' : 'no', u.created_at]
+      .map(v => `"${String(v).replace(/"/g, '""')}"`)
+      .join(',')
+  );
+  const csv = [header, ...rows].join('\r\n');
+
+  logger.info('Exportación de usuarios', { adminUser: req.user.username, count: users.length });
+  res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+  res.setHeader('Content-Disposition', `attachment; filename="usuarios_padel_${new Date().toISOString().slice(0,10)}.csv"`);
+  res.send('﻿' + csv); // BOM para que Excel lo abra bien
+});
+
+// ─── ADMIN: IMPORTAR USUARIOS ─────────────────────────────────────────────────
+app.post('/api/admin/import-users', authenticate, adminOnly, (req, res) => {
+  const { users } = req.body || {};
+  if (!Array.isArray(users) || users.length === 0)
+    return res.status(400).json({ error: 'No se han enviado usuarios para importar' });
+  if (users.length > 200)
+    return res.status(400).json({ error: 'Máximo 200 usuarios por importación' });
+
+  const results = { created: 0, skipped: 0, errors: [] };
+  const importStmt = db.prepare(
+    'INSERT OR IGNORE INTO users (username,name,password,calle,numero,approved,force_password_change) VALUES (?,?,?,?,?,?,1)'
+  );
+  // Temp password hash (force_password_change=1, recibirán enlace de reset)
+  const tempHash = bcrypt.hashSync('PENDIENTE_RESET_' + Date.now(), 10);
+
+  const importMany = db.transaction((list) => {
+    for (const u of list) {
+      const uname  = (u.usuario || u.username || '').trim().toLowerCase();
+      const name   = (u.nombre  || u.name     || '').trim();
+      const calle  = normalizeCalle(u.calle   || '');
+      const numero = normalizeNumero(u.numero  || '');
+      const approved = ['si','yes','1','true'].includes(String(u.acceso || u.approved || 'no').toLowerCase()) ? 1 : 0;
+
+      if (!uname || uname.length < 3 || !name || !calle || !numero) {
+        results.errors.push(`Fila ignorada — datos incompletos: ${JSON.stringify(u)}`);
+        results.skipped++;
+        continue;
+      }
+      const r = importStmt.run(uname, name, tempHash, calle, numero, approved);
+      if (r.changes > 0) results.created++;
+      else { results.skipped++; results.errors.push(`Usuario duplicado ignorado: ${uname}`); }
+    }
+  });
+
+  try {
+    importMany(users);
+    logger.info('Importación de usuarios', { adminUser: req.user.username, ...results });
+    res.json({ message: `Importación completada: ${results.created} creados, ${results.skipped} omitidos.`, ...results });
+  } catch(e) {
+    logger.error('Error en importación de usuarios', { error: e.message });
+    res.status(500).json({ error: 'Error durante la importación: ' + e.message });
+  }
+});
+
+// ─── ADMIN: CAMBIAR CONTRASEÑA DEL ADMIN ──────────────────────────────────────
+app.post('/api/admin/change-password', authenticate, adminOnly, (req, res) => {
+  const { current_password, new_password } = req.body || {};
+  if (!current_password || !new_password)
+    return res.status(400).json({ error: 'Contraseña actual y nueva son obligatorias' });
+  if (new_password.length < 4)
+    return res.status(400).json({ error: 'La nueva contraseña debe tener al menos 4 caracteres' });
+
+  const admin = db.prepare('SELECT password FROM users WHERE id=?').get(req.user.id);
+  if (!bcrypt.compareSync(current_password, admin.password))
+    return res.status(401).json({ error: 'La contraseña actual es incorrecta' });
+  if (current_password === new_password)
+    return res.status(400).json({ error: 'La nueva contraseña debe ser distinta a la actual' });
+
+  db.prepare('UPDATE users SET password=? WHERE id=?').run(bcrypt.hashSync(new_password, 10), req.user.id);
+  logger.info('Contraseña del administrador cambiada', { adminUser: req.user.username });
+  res.json({ message: 'Contraseña actualizada correctamente' });
+});
+
 app.get('*', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
 
 // ─── GLOBAL ERROR HANDLER ─────────────────────────────────────────────────────

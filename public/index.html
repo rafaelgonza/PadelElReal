@@ -560,6 +560,7 @@
       <button class="admin-tab active" onclick="switchAdminTab('config')">⏱ Horarios</button>
       <button class="admin-tab" onclick="switchAdminTab('users')">👥 Usuarios</button>
       <button class="admin-tab" onclick="switchAdminTab('history')">📋 Histórico</button>
+      <button class="admin-tab" onclick="switchAdminTab('account')">🔑 Cuenta</button>
     </div>
 
     <!-- CONFIG -->
@@ -638,6 +639,12 @@
 
     <!-- USERS -->
     <div id="apane-users" class="admin-pane">
+      <div class="import-export-bar">
+        <button class="btn-export" onclick="exportUsers()">📥 Exportar CSV</button>
+        <button class="btn-import" onclick="document.getElementById('import-file-input').click()">📤 Importar CSV</button>
+        <input type="file" id="import-file-input" accept=".csv" style="display:none" onchange="importUsers(this)"/>
+      </div>
+      <div class="import-result" id="import-result"></div>
       <input type="text" class="user-search" id="user-search" placeholder="🔍 Buscar por nombre, usuario o dirección…" oninput="filterUsers()"/>
       <div class="users-list" id="users-list">
         <div class="users-empty"><div class="spinner"></div></div>
@@ -664,6 +671,33 @@
         <button class="btn-mok" onclick="closeModals()">Cerrar</button>
       </div>
     </div>
+
+    <!-- ACCOUNT -->
+    <div id="apane-account" class="admin-pane">
+      <div class="account-section">
+        <h4>🔑 Cambiar contraseña del administrador</h4>
+        <div class="form-group">
+          <label>Contraseña actual</label>
+          <input id="adm-cur-pass" type="password" placeholder="Contraseña actual"/>
+        </div>
+        <div class="form-group">
+          <label>Nueva contraseña</label>
+          <input id="adm-new-pass" type="password" placeholder="Mínimo 4 caracteres"/>
+          <p class="field-hint warning">🔡 Distingue entre mayúsculas y minúsculas</p>
+        </div>
+        <div class="form-group">
+          <label>Repite la nueva contraseña</label>
+          <input id="adm-rep-pass" type="password" placeholder="Repite la nueva contraseña"/>
+        </div>
+        <p class="account-err" id="adm-pass-err"></p>
+        <p class="account-ok" id="adm-pass-ok"></p>
+        <div class="modal-actions" style="margin-top:.75rem">
+          <button class="btn-mc" onclick="closeModals()">Cerrar</button>
+          <button class="btn-mok" onclick="changeAdminPassword()">💾 Cambiar contraseña</button>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -1143,12 +1177,17 @@ function closeModals() {
 // ─── ADMIN ─────────────────────────────────────────────────
 function switchAdminTab(tab) {
   document.querySelectorAll('.admin-tab').forEach((b,i) => {
-    b.classList.toggle('active',['config','users','history'][i]===tab);
+    b.classList.toggle('active',['config','users','history','account'][i]===tab);
   });
   document.querySelectorAll('.admin-pane').forEach(p => p.classList.remove('active'));
   document.getElementById(`apane-${tab}`).classList.add('active');
   if (tab==='users')   loadAdminUsers();
   if (tab==='history') loadHistory();
+  if (tab==='account') {
+    ['adm-cur-pass','adm-new-pass','adm-rep-pass'].forEach(id => document.getElementById(id).value='');
+    document.getElementById('adm-pass-err').textContent='';
+    document.getElementById('adm-pass-ok').textContent='';
+  }
 }
 
 async function openAdmin() {
@@ -1361,6 +1400,96 @@ async function deleteUser(id, name) {
     toast(`Usuario "${name}" eliminado`,'success');
     loadAdminUsers();
   } catch(e) { toast(e.message,'error'); }
+}
+
+// ─── EXPORT / IMPORT ──────────────────────────────────────────────────────
+function exportUsers() {
+  // Download via hidden link — token in header not possible with <a>, use fetch+blob
+  fetch('/api/admin/export-users', { headers: { 'Authorization': `Bearer ${S.token}` } })
+    .then(r => {
+      if (!r.ok) throw new Error('Error al exportar');
+      return r.blob();
+    })
+    .then(blob => {
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      a.href     = url;
+      a.download = `usuarios_padel_${new Date().toISOString().slice(0,10)}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    })
+    .catch(e => toast(e.message, 'error'));
+}
+
+async function importUsers(input) {
+  const file = input.files[0];
+  if (!file) return;
+  input.value = ''; // reset so same file can be re-imported
+
+  const resultEl = document.getElementById('import-result');
+  resultEl.innerHTML = '<span style="color:var(--g400)">⏳ Procesando…</span>';
+  resultEl.classList.add('show');
+
+  try {
+    const text  = await file.text();
+    const lines = text.split(/?
+/).filter(l => l.trim());
+    if (lines.length < 2) throw new Error('El CSV está vacío o solo tiene cabecera');
+
+    // Parse CSV header
+    const headers = lines[0].split(',').map(h => h.replace(/^"|"$/g,'').trim().toLowerCase());
+    const users   = [];
+
+    for (let i = 1; i < lines.length; i++) {
+      // Simple CSV parse (handles quoted fields)
+      const cols = lines[i].match(/(".*?"|[^,]+)(?=,|$)/g) || [];
+      const clean = cols.map(c => c.replace(/^"|"$/g,'').trim());
+      const row   = {};
+      headers.forEach((h, idx) => row[h] = clean[idx] || '');
+      // Accept both Spanish and English column names
+      users.push({
+        nombre:  row['nombre']  || row['name']     || '',
+        usuario: row['usuario'] || row['username'] || '',
+        calle:   row['calle']   || '',
+        numero:  row['numero']  || row['número']  || '',
+        acceso:  row['acceso']  || row['approved'] || 'no',
+      });
+    }
+
+    const data = await api('POST', '/admin/import-users', { users });
+    let html = `<p>✅ <strong>${data.created}</strong> usuarios creados`;
+    if (data.skipped) html += ` · <strong>${data.skipped}</strong> omitidos`;
+    html += `.</p>`;
+    if (data.created > 0) html += `<p style="color:var(--g600);font-size:.78rem;margin-top:.25rem">Los usuarios importados deberán recibir un enlace de reseteo para crear su contraseña.</p>`;
+    if (data.errors?.length) {
+      html += `<div class="import-err-list">${data.errors.map(e => `• ${escHtml(e)}`).join('<br>')}</div>`;
+    }
+    resultEl.innerHTML = html;
+    loadAdminUsers();
+  } catch(e) {
+    resultEl.innerHTML = `<span style="color:var(--red)">❌ ${escHtml(e.message)}</span>`;
+  }
+}
+
+// ─── CAMBIAR CONTRASEÑA ADMIN ──────────────────────────────────────────────
+async function changeAdminPassword() {
+  const cur  = document.getElementById('adm-cur-pass').value;
+  const nw   = document.getElementById('adm-new-pass').value;
+  const rep  = document.getElementById('adm-rep-pass').value;
+  const errEl = document.getElementById('adm-pass-err');
+  const okEl  = document.getElementById('adm-pass-ok');
+  errEl.textContent=''; okEl.textContent='';
+
+  if (!cur || !nw || !rep) { errEl.textContent='Rellena todos los campos'; return; }
+  if (nw.length < 4)        { errEl.textContent='La nueva contraseña debe tener al menos 4 caracteres'; return; }
+  if (nw !== rep)            { errEl.textContent='Las contraseñas nuevas no coinciden'; return; }
+
+  try {
+    await api('POST', '/admin/change-password', { current_password: cur, new_password: nw });
+    okEl.textContent = '✅ Contraseña actualizada correctamente';
+    ['adm-cur-pass','adm-new-pass','adm-rep-pass'].forEach(id => document.getElementById(id).value='');
+    toast('Contraseña del administrador actualizada ✓','success');
+  } catch(e) { errEl.textContent = e.message; }
 }
 
 // ─── ADMIN HISTORY ─────────────────────────────────────────
