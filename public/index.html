@@ -48,6 +48,9 @@
     .form-group input:focus{border-color:var(--green);box-shadow:0 0 0 4px rgba(26,107,58,.1)}
     .form-row{display:grid;grid-template-columns:1fr auto;gap:.75rem}
     .form-row .form-group:last-child input{width:100px}
+    .field-hint{font-size:.75rem;color:var(--g400);margin-top:.3rem;line-height:1.4}
+    .field-hint strong{color:var(--g600)}
+    .field-hint.warning{background:#fef9c3;color:#854d0e;border-radius:6px;padding:.35rem .6rem;border-left:3px solid #eab308}
     .btn-auth{width:100%;padding:.8rem;background:var(--green);color:white;border:none;border-radius:var(--r);
       font-size:1rem;font-weight:700;font-family:var(--fh);letter-spacing:.5px;transition:background .2s,transform .1s;margin-top:.5rem}
     .btn-auth:hover{background:var(--green-d)}.btn-auth:active{transform:scale(.98)}
@@ -379,6 +382,7 @@
       </div>
       <div class="form-group"><label>Usuario</label>
         <input id="r-user" type="text" placeholder="juangarcia" autocomplete="username"/>
+        <p class="field-hint">⚠️ <strong>Recuerda bien tu usuario</strong> — lo necesitarás para iniciar sesión. Las letras se guardan en <strong>minúsculas</strong> automáticamente.</p>
       </div>
       <div class="form-row">
         <div class="form-group"><label>Calle / Avenida</label>
@@ -390,6 +394,7 @@
       </div>
       <div class="form-group"><label>Contraseña</label>
         <input id="r-pass" type="password" placeholder="Mínimo 4 caracteres" autocomplete="new-password"/>
+        <p class="field-hint warning">🔡 La contraseña <strong>distingue entre mayúsculas y minúsculas</strong>. Escríbela exactamente igual cada vez que entres.</p>
       </div>
       <button class="btn-auth" onclick="doRegister()">Crear cuenta</button>
     </div>
@@ -417,6 +422,7 @@
     <div class="form-group" style="text-align:left">
       <label>Nueva contraseña</label>
       <input id="chpass-new" type="password" placeholder="Mínimo 4 caracteres"/>
+      <p class="field-hint warning">🔡 La contraseña <strong>distingue entre mayúsculas y minúsculas</strong>. Escríbela exactamente igual cada vez que entres.</p>
     </div>
     <div class="form-group" style="text-align:left">
       <label>Repite la contraseña</label>
@@ -438,6 +444,7 @@
       <div class="form-group" style="text-align:left">
         <label>Nueva contraseña</label>
         <input id="reset-new" type="password" placeholder="Mínimo 4 caracteres"/>
+        <p class="field-hint warning">🔡 La contraseña <strong>distingue entre mayúsculas y minúsculas</strong>. Escríbela exactamente igual cada vez que entres.</p>
       </div>
       <div class="form-group" style="text-align:left">
         <label>Repite la contraseña</label>
