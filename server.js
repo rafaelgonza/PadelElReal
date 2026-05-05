@@ -149,8 +149,40 @@ const approvedOnly = (req, res, next) => {
 };
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
+// Para comparar direcciones ignorando tildes y mayúsculas
 function normalizeAddr(s) {
   return s.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+}
+
+// Normaliza el nombre de calle para almacenamiento:
+//   - Elimina prefijos (calle, avda, c/, etc.)
+//   - Convierte a MAYÚSCULAS
+function normalizeCalle(s) {
+  let v = s.trim();
+  // Eliminar prefijos comunes al inicio (case-insensitive)
+  const prefijos = [
+    /^c(?:alle)?\s*[.\/\s]\s*/i,
+    /^av(?:enida|da?)?\s*[.\/\s]\s*/i,
+    /^pza?\s*[.\/\s]\s*/i,
+    /^plaza\s*[.\/\s]\s*/i,
+    /^urb(?:anizaci[oó]n)?\s*[.\/\s]\s*/i,
+    /^p(?:aseo|so)?\s*[.\/\s]\s*/i,
+    /^ctra?\s*[.\/\s]\s*/i,
+    /^carretera\s*[.\/\s]\s*/i,
+    /^r(?:onda)?\s*[.\/\s]\s*/i,
+    /^cam(?:ino)?\s*[.\/\s]\s*/i,
+    /^cl\s*[.\/\s]\s*/i,
+  ];
+  for (const re of prefijos) {
+    const nuevo = v.replace(re, '');
+    if (nuevo !== v) { v = nuevo; break; }
+  }
+  return v.trim().toUpperCase();
+}
+
+// Normaliza el número: mayúsculas y sin espacios extra
+function normalizeNumero(s) {
+  return s.trim().toUpperCase();
 }
 
 function getFullConfig() {
@@ -211,9 +243,11 @@ app.post('/api/auth/register', (req, res) => {
 
   try {
     const uname = username.trim().toLowerCase();
+    const calleNorm2 = normalizeCalle(calle);
+    const numNorm2    = normalizeNumero(numero);
     db.prepare('INSERT INTO users (username, name, password, calle, numero, approved) VALUES (?,?,?,?,?,0)')
-      .run(uname, name.trim(), bcrypt.hashSync(password, 10), calle.trim(), numero.trim());
-    logger.info('Registro nuevo usuario (pendiente aprobación)', { username: uname, calle: calle.trim(), numero: numero.trim() });
+      .run(uname, name.trim(), bcrypt.hashSync(password, 10), calleNorm2, numNorm2);
+    logger.info('Registro nuevo usuario (pendiente aprobación)', { username: uname, calle: calleNorm2, numero: numNorm2 });
     res.json({ pending: true });
   } catch(e) {
     if (e.message.includes('UNIQUE')) {
@@ -351,22 +385,31 @@ app.patch('/api/admin/users/:id/approval', authenticate, adminOnly, (req, res) =
 });
 
 app.patch('/api/admin/users/:id', authenticate, adminOnly, (req, res) => {
-  const { name, username, password } = req.body || {};
+  const { name, username, password, calle, numero } = req.body || {};
   const u = db.prepare('SELECT id,is_admin FROM users WHERE id=?').get(req.params.id);
   if (!u) return res.status(404).json({ error: 'Usuario no encontrado' });
   if (!name?.trim() || !username?.trim()) return res.status(400).json({ error: 'Nombre y usuario son obligatorios' });
   if (username.trim().length < 3) return res.status(400).json({ error: 'Usuario mínimo 3 caracteres' });
   if (password && password.length < 4) return res.status(400).json({ error: 'Contraseña mínimo 4 caracteres' });
+  if (!calle?.trim() || !numero?.trim()) return res.status(400).json({ error: 'Calle y número son obligatorios' });
+
+  const calleNorm2 = normalizeCalle(calle);
+  const numNorm2   = normalizeNumero(numero);
+
+  // Verificar que la dirección no la tenga ya otro usuario
+  const addrTaken = db.prepare('SELECT calle, numero FROM users WHERE id != ?').all(req.params.id)
+    .some(row => normalizeAddr(row.calle) === normalizeAddr(calleNorm2) && normalizeAddr(row.numero) === normalizeAddr(numNorm2));
+  if (addrTaken) return res.status(400).json({ error: 'Ya existe otro usuario con esa dirección' });
 
   try {
     if (password) {
-      db.prepare('UPDATE users SET name=?, username=?, password=? WHERE id=?')
-        .run(name.trim(), username.trim().toLowerCase(), bcrypt.hashSync(password, 10), req.params.id);
+      db.prepare('UPDATE users SET name=?, username=?, password=?, calle=?, numero=? WHERE id=?')
+        .run(name.trim(), username.trim().toLowerCase(), bcrypt.hashSync(password, 10), calleNorm2, numNorm2, req.params.id);
     } else {
-      db.prepare('UPDATE users SET name=?, username=? WHERE id=?')
-        .run(name.trim(), username.trim().toLowerCase(), req.params.id);
+      db.prepare('UPDATE users SET name=?, username=?, calle=?, numero=? WHERE id=?')
+        .run(name.trim(), username.trim().toLowerCase(), calleNorm2, numNorm2, req.params.id);
     }
-    logger.info('Usuario editado por admin', { targetUserId: req.params.id, adminUser: req.user.username, passwordChanged: !!password });
+    logger.info('Usuario editado por admin', { targetUserId: req.params.id, adminUser: req.user.username, passwordChanged: !!password, calle: calleNorm2, numero: numNorm2 });
     res.json({ message: 'Usuario actualizado' });
   } catch(e) {
     if (e.message.includes('UNIQUE')) {

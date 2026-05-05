@@ -1143,10 +1143,12 @@ function renderUserList(users) {
             <input id="ef-name-${u.id}" type="text" value="${escHtml(u.name)}"/></div>
           <div class="edit-field"><label>Usuario</label>
             <input id="ef-user-${u.id}" type="text" value="${escHtml(u.username)}"/></div>
+          <div class="edit-field"><label>Calle (sin prefijo)</label>
+            <input id="ef-calle-${u.id}" type="text" value="${escHtml(u.calle)}" placeholder="Ej: MAYOR"/></div>
+          <div class="edit-field"><label>Número</label>
+            <input id="ef-num-${u.id}" type="text" value="${escHtml(u.numero)}" placeholder="Ej: 12B"/></div>
           <div class="edit-field"><label>Nueva contraseña</label>
             <input id="ef-pass-${u.id}" type="password" placeholder="Dejar vacío para no cambiar"/></div>
-          <div class="edit-field"><label>Calle</label>
-            <input id="ef-calle-${u.id}" type="text" value="${escHtml(u.calle)}" disabled style="opacity:.6"/></div>
         </div>
         <p class="edit-err" id="ef-err-${u.id}"></p>
         <div class="edit-actions">
@@ -1170,18 +1172,21 @@ function toggleUserEdit(id, rowEl) {
 async function saveUserEdit(id) {
   const name     = document.getElementById(`ef-name-${id}`).value.trim();
   const username = document.getElementById(`ef-user-${id}`).value.trim();
+  const calle    = document.getElementById(`ef-calle-${id}`).value.trim();
+  const numero   = document.getElementById(`ef-num-${id}`).value.trim();
   const password = document.getElementById(`ef-pass-${id}`).value;
   const errEl    = document.getElementById(`ef-err-${id}`);
   errEl.textContent = '';
   if (!name || !username) { errEl.textContent='Nombre y usuario son obligatorios'; return; }
+  if (!calle || !numero)  { errEl.textContent='Calle y número son obligatorios'; return; }
 
   const changed = password
-    ? `nombre, usuario y contraseña`
-    : `nombre y usuario`;
+    ? `nombre, usuario, dirección y contraseña`
+    : `nombre, usuario y dirección`;
   if (!confirm(`¿Confirmas que quieres cambiar los datos de este usuario (${changed})?`)) return;
 
   try {
-    await api('PATCH',`/admin/users/${id}`, { name, username, password: password || undefined });
+    await api('PATCH',`/admin/users/${id}`, { name, username, calle, numero, password: password || undefined });
     toast('Usuario actualizado ✓','success');
     loadAdminUsers();
   } catch(e) { errEl.textContent = e.message; }
