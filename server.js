@@ -81,6 +81,7 @@ db.exec(`
 try { db.exec('ALTER TABLE users ADD COLUMN calle TEXT NOT NULL DEFAULT ""'); } catch {}
 try { db.exec('ALTER TABLE users ADD COLUMN numero TEXT NOT NULL DEFAULT ""'); } catch {}
 try { db.exec('ALTER TABLE users ADD COLUMN approved INTEGER NOT NULL DEFAULT 0'); } catch {}
+try { db.exec('ALTER TABLE users ADD COLUMN force_password_change INTEGER NOT NULL DEFAULT 0'); } catch {}
 db.exec('UPDATE users SET approved = 1 WHERE is_admin = 1');
 
 // Migrate old single-schedule config to new winter/summer schema
@@ -272,8 +273,14 @@ app.post('/api/auth/login', (req, res) => {
     return res.status(403).json({ error: 'PENDIENTE_APROBACION' });
   }
   const user = { id: u.id, username: u.username, name: u.name, is_admin: u.is_admin, calle: u.calle, numero: u.numero };
-  logger.info('Login correcto', { username: uname, is_admin: !!u.is_admin });
-  res.json({ token: jwt.sign(user, JWT_SECRET, { expiresIn: '30d' }), user });
+  logger.info('Login correcto', { username: uname, is_admin: !!u.is_admin, forceChange: !!u.force_password_change });
+  // Si tiene clave temporal, devolvemos token de corta duración y flag
+  const token = jwt.sign(
+    { ...user, force_password_change: !!u.force_password_change },
+    JWT_SECRET,
+    { expiresIn: u.force_password_change ? '1h' : '30d' }
+  );
+  res.json({ token, user, force_password_change: !!u.force_password_change });
 });
 
 // ─── RESERVATIONS ─────────────────────────────────────────────────────────────
@@ -419,6 +426,37 @@ app.patch('/api/admin/users/:id', authenticate, adminOnly, (req, res) => {
     logger.error('Error editando usuario', { error: e.message });
     res.status(500).json({ error: 'Error del servidor' });
   }
+});
+
+// Generar clave temporal (admin)
+app.post('/api/admin/users/:id/temp-password', authenticate, adminOnly, (req, res) => {
+  const u = db.prepare('SELECT id,is_admin,username FROM users WHERE id=?').get(req.params.id);
+  if (!u) return res.status(404).json({ error: 'Usuario no encontrado' });
+  if (u.is_admin) return res.status(400).json({ error: 'No se puede generar clave temporal para el admin' });
+
+  // Generar clave aleatoria de 8 caracteres (letras + números, fácil de leer)
+  const chars   = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // sin 0,O,1,I para evitar confusiones
+  const tempPwd = Array.from({ length: 8 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+
+  db.prepare('UPDATE users SET password=?, force_password_change=1 WHERE id=?')
+    .run(bcrypt.hashSync(tempPwd, 10), req.params.id);
+
+  logger.info('Clave temporal generada por admin', { targetUserId: req.params.id, targetUsername: u.username, adminUser: req.user.username });
+  // La clave se devuelve en texto plano UNA SOLA VEZ — el admin se la comunica al usuario
+  res.json({ temp_password: tempPwd });
+});
+
+// Cambiar contraseña propia (usuario con force_password_change o cualquier usuario autenticado)
+app.post('/api/auth/change-password', authenticate, (req, res) => {
+  const { new_password } = req.body || {};
+  if (!new_password || new_password.length < 4)
+    return res.status(400).json({ error: 'La nueva contraseña debe tener al menos 4 caracteres' });
+
+  db.prepare('UPDATE users SET password=?, force_password_change=0 WHERE id=?')
+    .run(bcrypt.hashSync(new_password, 10), req.user.id);
+
+  logger.info('Contraseña cambiada', { userId: req.user.id, username: req.user.username, forced: !!req.user.force_password_change });
+  res.json({ message: 'Contraseña actualizada correctamente' });
 });
 
 app.delete('/api/admin/users/:id', authenticate, adminOnly, (req, res) => {

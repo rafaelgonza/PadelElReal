@@ -62,6 +62,30 @@
     #pending-screen{display:none;min-height:100vh;align-items:center;justify-content:center;padding:1.5rem;
       background:linear-gradient(145deg,#0d3d1f 0%,#1a6b3a 50%,#2d9955 100%)}
     #pending-screen.show{display:flex}
+    #chpass-screen{display:none;min-height:100vh;align-items:center;justify-content:center;padding:1.5rem;
+      background:linear-gradient(145deg,#1e1b4b 0%,#312e81 50%,#4338ca 100%)}
+    #chpass-screen.show{display:flex}
+    .chpass-card{background:var(--white);border-radius:20px;padding:2.5rem;max-width:400px;width:100%;
+      text-align:center;box-shadow:var(--shlg)}
+    .chpass-card .icon{width:64px;height:64px;background:#ede9fe;border-radius:18px;display:inline-flex;
+      align-items:center;justify-content:center;font-size:2rem;margin-bottom:1rem}
+    .chpass-card h2{font-family:var(--fh);font-size:1.75rem;font-weight:800;color:var(--g900);margin-bottom:.5rem}
+    .chpass-card p{color:var(--g600);font-size:.9rem;line-height:1.5;margin-bottom:1.5rem}
+    .chpass-err{background:var(--red-l);color:var(--red);border-radius:var(--r);padding:.625rem .875rem;
+      font-size:.875rem;margin-bottom:1rem;display:none;text-align:left}
+    .chpass-err.show{display:block}
+    /* Temp password modal */
+    .temp-pwd-box{background:#1e1b4b;border-radius:var(--r);padding:1rem 1.5rem;margin:1rem 0;
+      text-align:center}
+    .temp-pwd-value{font-family:var(--fh);font-size:2.5rem;font-weight:800;letter-spacing:.4em;
+      color:#a5f3fc;display:block;margin-bottom:.375rem}
+    .temp-pwd-note{font-size:.75rem;color:rgba(255,255,255,.6)}
+    .btn-copy{margin-top:.75rem;padding:.5rem 1.25rem;border:none;border-radius:8px;
+      background:#a5f3fc;color:#1e1b4b;font-weight:700;font-size:.85rem;cursor:pointer;transition:all .2s}
+    .btn-copy:hover{background:#67e8f9}
+    .btn-temp-pwd{padding:.4rem .875rem;border:none;border-radius:8px;font-size:.78rem;font-weight:600;
+      background:#ede9fe;color:#4338ca;transition:all .2s;white-space:nowrap}
+    .btn-temp-pwd:hover{background:#4338ca;color:white}
     .pending-card{background:var(--white);border-radius:20px;padding:2.5rem;max-width:400px;width:100%;
       text-align:center;box-shadow:var(--shlg)}
     .pending-icon{font-size:3rem;margin-bottom:1rem}
@@ -370,6 +394,25 @@
   </div>
 </div>
 
+<!-- ═══ CAMBIO DE CONTRASEÑA OBLIGATORIO ════════════════════════════════════ -->
+<div id="chpass-screen">
+  <div class="chpass-card">
+    <div class="icon">🔑</div>
+    <h2>Nueva contraseña</h2>
+    <p>Has accedido con una contraseña temporal. Debes crear una nueva contraseña antes de continuar.</p>
+    <div id="chpass-err" class="chpass-err"></div>
+    <div class="form-group" style="text-align:left">
+      <label>Nueva contraseña</label>
+      <input id="chpass-new" type="password" placeholder="Mínimo 4 caracteres"/>
+    </div>
+    <div class="form-group" style="text-align:left">
+      <label>Repite la contraseña</label>
+      <input id="chpass-rep" type="password" placeholder="Repite la contraseña"/>
+    </div>
+    <button class="btn-auth" onclick="doChangePassword()">Guardar y entrar →</button>
+  </div>
+</div>
+
 <!-- ═══ APP ═══════════════════════════════════════════════════════════════ -->
 <div id="app-screen">
   <header>
@@ -582,6 +625,24 @@
   </div>
 </div>
 
+<!-- ═══ MODAL: CLAVE TEMPORAL ══════════════════════════════════════════════ -->
+<div id="modal-temp-pwd" class="overlay">
+  <div class="modal" style="max-width:380px;text-align:center">
+    <div class="modal-icon" style="background:#ede9fe;margin:0 auto 1rem">🔑</div>
+    <h3 class="modal-title">Clave temporal generada</h3>
+    <p class="modal-sub">Comunica esta clave al vecino por WhatsApp o teléfono.<br>
+      <strong>Solo se muestra una vez.</strong></p>
+    <div class="temp-pwd-box">
+      <span class="temp-pwd-value" id="temp-pwd-value">——</span>
+      <span class="temp-pwd-note">El usuario deberá cambiarla al iniciar sesión</span>
+    </div>
+    <button class="btn-copy" onclick="copyTempPwd()">📋 Copiar clave</button>
+    <div class="modal-actions" style="margin-top:1.25rem">
+      <button class="btn-mok" onclick="closeModals()">Entendido</button>
+    </div>
+  </div>
+</div>
+
 <div id="toast"></div>
 
 <script>
@@ -634,8 +695,8 @@ async function doLogin() {
   const password = document.getElementById('l-pass').value;
   if (!username||!password) return showAuthErr('Introduce usuario y contraseña');
   try {
-    const { token, user } = await api('POST','/auth/login',{username,password});
-    onLogin(token, user);
+    const resp = await api('POST','/auth/login',{username,password});
+    onLogin(resp.token, resp.user, resp.force_password_change);
   } catch(e) {
     if (e.message === 'PENDIENTE_APROBACION') {
       showPending();
@@ -660,21 +721,54 @@ async function doRegister() {
   } catch(e) { showAuthErr(e.message); }
 }
 
-function onLogin(token, user) {
+function onLogin(token, user, forceChange) {
   S.token = token; S.user = user;
   localStorage.setItem('padel_token', token);
   localStorage.setItem('padel_user', JSON.stringify(user));
-  showApp();
+  if (forceChange) {
+    showChangePassword();
+  } else {
+    showApp();
+  }
+}
+
+function showChangePassword() {
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('pending-screen').classList.remove('show');
+  document.getElementById('app-screen').classList.remove('show');
+  document.getElementById('chpass-screen').classList.add('show');
+  document.getElementById('chpass-new').value = '';
+  document.getElementById('chpass-rep').value = '';
+  document.getElementById('chpass-err').classList.remove('show');
+}
+
+async function doChangePassword() {
+  const newPwd = document.getElementById('chpass-new').value;
+  const repPwd = document.getElementById('chpass-rep').value;
+  const errEl  = document.getElementById('chpass-err');
+  errEl.classList.remove('show');
+  if (newPwd.length < 4) { errEl.textContent='La contraseña debe tener al menos 4 caracteres'; errEl.classList.add('show'); return; }
+  if (newPwd !== repPwd)  { errEl.textContent='Las contraseñas no coinciden'; errEl.classList.add('show'); return; }
+  try {
+    await api('POST', '/auth/change-password', { new_password: newPwd });
+    // Re-login to get fresh token without force_password_change
+    const { token, user } = await api('POST', '/auth/login', { username: S.user.username, password: newPwd });
+    document.getElementById('chpass-screen').classList.remove('show');
+    onLogin(token, user, false);
+    toast('¡Contraseña actualizada! Bienvenido/a 🎾', 'success');
+  } catch(e) { errEl.textContent = e.message; errEl.classList.add('show'); }
 }
 
 function showPending() {
   document.getElementById('auth-screen').style.display = 'none';
   document.getElementById('pending-screen').classList.add('show');
   document.getElementById('app-screen').classList.remove('show');
+  document.getElementById('chpass-screen').classList.remove('show');
 }
 
 function backToLogin() {
   document.getElementById('pending-screen').classList.remove('show');
+  document.getElementById('chpass-screen').classList.remove('show');
   document.getElementById('auth-screen').style.display = 'flex';
 }
 
@@ -683,6 +777,7 @@ function doLogout() {
   localStorage.removeItem('padel_token'); localStorage.removeItem('padel_user');
   document.getElementById('app-screen').classList.remove('show');
   document.getElementById('pending-screen').classList.remove('show');
+  document.getElementById('chpass-screen').classList.remove('show');
   document.getElementById('auth-screen').style.display='flex';
 }
 
@@ -1153,7 +1248,8 @@ function renderUserList(users) {
         <p class="edit-err" id="ef-err-${u.id}"></p>
         <div class="edit-actions">
           <button class="btn-edit-cancel" onclick="toggleUserEdit(${u.id},null)">Cancelar</button>
-          <button class="btn-edit-save" onclick="saveUserEdit(${u.id})">💾 Guardar cambios</button>
+          <button class="btn-edit-save" onclick="saveUserEdit(${u.id})">💾 Guardar</button>
+          <button class="btn-temp-pwd" onclick="generateTempPassword(${u.id},'${escHtml(u.name).replace(/'/g,'')}')">🔑 Clave temp.</button>
           <button class="btn-edit-delete" onclick="deleteUser(${u.id},'${escHtml(u.name).replace(/'/g,'')}')">🗑 Eliminar</button>
         </div>
       </div>`;
@@ -1199,6 +1295,25 @@ async function setApproval(id, approved, btn) {
     toast(approved ? '✓ Acceso concedido' : 'Acceso denegado', approved?'success':'');
     loadAdminUsers();
   } catch(e) { toast(e.message,'error'); btn.disabled=false; }
+}
+
+async function generateTempPassword(id, name) {
+  if (!confirm(`¿Generar una clave temporal para "${name}"?\n\nSu contraseña actual quedará inhabilitada y deberá crear una nueva al iniciar sesión.`)) return;
+  try {
+    const data = await api('POST', `/admin/users/${id}/temp-password`, {});
+    document.getElementById('temp-pwd-value').textContent = data.temp_password;
+    document.getElementById('modal-temp-pwd').classList.add('show');
+    S._tempPwd = data.temp_password;
+  } catch(e) { toast(e.message,'error'); }
+}
+
+function copyTempPwd() {
+  if (!S._tempPwd) return;
+  navigator.clipboard.writeText(S._tempPwd).then(() => {
+    toast('Clave copiada al portapapeles','success');
+  }).catch(() => {
+    toast('No se pudo copiar — cópiala manualmente','error');
+  });
 }
 
 async function deleteUser(id, name) {
@@ -1293,7 +1408,18 @@ document.getElementById('r-pass').addEventListener('keydown',e=>e.key==='Enter'&
   const token = localStorage.getItem('padel_token');
   const user  = localStorage.getItem('padel_user');
   if (token && user) {
-    try { S.token=token; S.user=JSON.parse(user); showApp(); return; } catch {}
+    try {
+      S.token = token;
+      S.user  = JSON.parse(user);
+      // Decode token payload to check force_password_change
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      if (payload.force_password_change) {
+        showChangePassword();
+      } else {
+        showApp();
+      }
+      return;
+    } catch {}
   }
   document.getElementById('auth-screen').style.display='flex';
 })();
