@@ -8,7 +8,8 @@ const path = require('path');
 const fs = require('fs');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT    = process.env.PORT || 3000;
+const APP_URL  = (process.env.APP_URL || 'https://padelelreal-production.up.railway.app').replace(/\/$/, '');
 const JWT_SECRET = process.env.JWT_SECRET || 'padel-jwt-secret-change-me-in-production-2024';
 
 // ─── LOGGER ───────────────────────────────────────────────────────────────────
@@ -74,6 +75,15 @@ db.exec(`
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (court_id) REFERENCES courts(id) ON DELETE CASCADE,
     UNIQUE(court_id, date, slot_index)
+  );
+  CREATE TABLE IF NOT EXISTS password_reset_tokens (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    token TEXT UNIQUE NOT NULL,
+    expires_at TEXT NOT NULL,
+    used INTEGER DEFAULT 0,
+    created_at TEXT DEFAULT (datetime('now')),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
   );
 `);
 
@@ -428,34 +438,75 @@ app.patch('/api/admin/users/:id', authenticate, adminOnly, (req, res) => {
   }
 });
 
-// Generar clave temporal (admin)
-app.post('/api/admin/users/:id/temp-password', authenticate, adminOnly, (req, res) => {
-  const u = db.prepare('SELECT id,is_admin,username FROM users WHERE id=?').get(req.params.id);
+// ─── RESET DE CONTRASEÑA POR TOKEN ───────────────────────────────────────────
+
+// Genera un enlace de reseteo (admin) — el admin nunca ve ninguna contraseña
+app.post('/api/admin/users/:id/reset-link', authenticate, adminOnly, (req, res) => {
+  const u = db.prepare('SELECT id,is_admin,username,name FROM users WHERE id=?').get(req.params.id);
   if (!u) return res.status(404).json({ error: 'Usuario no encontrado' });
-  if (u.is_admin) return res.status(400).json({ error: 'No se puede generar clave temporal para el admin' });
+  if (u.is_admin) return res.status(400).json({ error: 'No se puede resetear la contraseña del admin' });
 
-  // Generar clave aleatoria de 8 caracteres (letras + números, fácil de leer)
-  const chars   = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // sin 0,O,1,I para evitar confusiones
-  const tempPwd = Array.from({ length: 8 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+  // Token criptográficamente seguro de 48 bytes → 96 hex chars
+  const token     = require('crypto').randomBytes(48).toString('hex');
+  const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(); // 24h
 
-  db.prepare('UPDATE users SET password=?, force_password_change=1 WHERE id=?')
-    .run(bcrypt.hashSync(tempPwd, 10), req.params.id);
+  // Invalidar tokens anteriores del mismo usuario y crear uno nuevo
+  db.prepare('DELETE FROM password_reset_tokens WHERE user_id=?').run(u.id);
+  db.prepare('INSERT INTO password_reset_tokens (user_id, token, expires_at) VALUES (?,?,?)').run(u.id, token, expiresAt);
 
-  logger.info('Clave temporal generada por admin', { targetUserId: req.params.id, targetUsername: u.username, adminUser: req.user.username });
-  // La clave se devuelve en texto plano UNA SOLA VEZ — el admin se la comunica al usuario
-  res.json({ temp_password: tempPwd });
+  const resetUrl = `${APP_URL}/reset?token=${token}`;
+  logger.info('Enlace de reseteo generado', { targetUserId: u.id, targetUsername: u.username, adminUser: req.user.username, expiresAt });
+  res.json({ reset_url: resetUrl, expires_at: expiresAt, user_name: u.name });
 });
 
-// Cambiar contraseña propia (usuario con force_password_change o cualquier usuario autenticado)
+// Valida un token de reseteo (sin autenticación — lo usa el vecino desde el enlace)
+app.get('/api/auth/reset-token/:token', (req, res) => {
+  const row = db.prepare(`
+    SELECT t.*, u.username, u.name FROM password_reset_tokens t
+    JOIN users u ON t.user_id = u.id
+    WHERE t.token=? AND t.used=0
+  `).get(req.params.token);
+  if (!row) return res.status(404).json({ error: 'Enlace no válido o ya utilizado' });
+  if (new Date(row.expires_at) < new Date()) {
+    db.prepare('DELETE FROM password_reset_tokens WHERE id=?').run(row.id);
+    return res.status(410).json({ error: 'Este enlace ha caducado (válido 24h). Pide uno nuevo al administrador.' });
+  }
+  res.json({ valid: true, name: row.name, username: row.username });
+});
+
+// Aplica el reseteo: establece nueva contraseña usando el token
+app.post('/api/auth/reset-password', (req, res) => {
+  const { token, new_password } = req.body || {};
+  if (!token || !new_password) return res.status(400).json({ error: 'Faltan datos' });
+  if (new_password.length < 4) return res.status(400).json({ error: 'La contraseña debe tener al menos 4 caracteres' });
+
+  const row = db.prepare(`
+    SELECT t.*, u.username FROM password_reset_tokens t
+    JOIN users u ON t.user_id = u.id
+    WHERE t.token=? AND t.used=0
+  `).get(token);
+  if (!row) return res.status(404).json({ error: 'Enlace no válido o ya utilizado' });
+  if (new Date(row.expires_at) < new Date()) {
+    db.prepare('DELETE FROM password_reset_tokens WHERE id=?').run(row.id);
+    return res.status(410).json({ error: 'Este enlace ha caducado. Pide uno nuevo al administrador.' });
+  }
+
+  db.prepare('UPDATE users SET password=?, force_password_change=0 WHERE id=?')
+    .run(bcrypt.hashSync(new_password, 10), row.user_id);
+  db.prepare('UPDATE password_reset_tokens SET used=1 WHERE id=?').run(row.id);
+
+  logger.info('Contraseña restablecida por token', { userId: row.user_id, username: row.username });
+  res.json({ message: 'Contraseña actualizada correctamente' });
+});
+
+// Cambiar contraseña propia (usuario autenticado)
 app.post('/api/auth/change-password', authenticate, (req, res) => {
   const { new_password } = req.body || {};
   if (!new_password || new_password.length < 4)
     return res.status(400).json({ error: 'La nueva contraseña debe tener al menos 4 caracteres' });
-
   db.prepare('UPDATE users SET password=?, force_password_change=0 WHERE id=?')
     .run(bcrypt.hashSync(new_password, 10), req.user.id);
-
-  logger.info('Contraseña cambiada', { userId: req.user.id, username: req.user.username, forced: !!req.user.force_password_change });
+  logger.info('Contraseña cambiada (autenticado)', { userId: req.user.id, username: req.user.username });
   res.json({ message: 'Contraseña actualizada correctamente' });
 });
 
@@ -488,6 +539,7 @@ app.use((err, req, res, next) => {
 app.listen(PORT, () => {
   logger.info('🎾 Club El Real de Espartinas arrancado', {
     port: PORT,
+    appUrl: APP_URL,
     db: DB_PATH,
     timezone: process.env.TZ,
     logLevel: LOG_LEVEL,

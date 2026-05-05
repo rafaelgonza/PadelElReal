@@ -74,18 +74,31 @@
     .chpass-err{background:var(--red-l);color:var(--red);border-radius:var(--r);padding:.625rem .875rem;
       font-size:.875rem;margin-bottom:1rem;display:none;text-align:left}
     .chpass-err.show{display:block}
-    /* Temp password modal */
-    .temp-pwd-box{background:#1e1b4b;border-radius:var(--r);padding:1rem 1.5rem;margin:1rem 0;
-      text-align:center}
-    .temp-pwd-value{font-family:var(--fh);font-size:2.5rem;font-weight:800;letter-spacing:.4em;
-      color:#a5f3fc;display:block;margin-bottom:.375rem}
-    .temp-pwd-note{font-size:.75rem;color:rgba(255,255,255,.6)}
+    /* Reset link modal */
+    .reset-link-box{background:#0f172a;border-radius:var(--r);padding:.875rem 1rem;margin:1rem 0;
+      text-align:left;word-break:break-all}
+    .reset-link-value{font-size:.75rem;color:#7dd3fc;font-family:monospace;line-height:1.5;display:block}
+    .reset-link-note{font-size:.75rem;color:rgba(255,255,255,.55);display:block;margin-top:.375rem}
     .btn-copy{margin-top:.75rem;padding:.5rem 1.25rem;border:none;border-radius:8px;
-      background:#a5f3fc;color:#1e1b4b;font-weight:700;font-size:.85rem;cursor:pointer;transition:all .2s}
-    .btn-copy:hover{background:#67e8f9}
-    .btn-temp-pwd{padding:.4rem .875rem;border:none;border-radius:8px;font-size:.78rem;font-weight:600;
+      background:#7dd3fc;color:#0f172a;font-weight:700;font-size:.85rem;cursor:pointer;transition:all .2s}
+    .btn-copy:hover{background:#38bdf8}
+    .btn-reset-link{padding:.4rem .875rem;border:none;border-radius:8px;font-size:.78rem;font-weight:600;
       background:#ede9fe;color:#4338ca;transition:all .2s;white-space:nowrap}
-    .btn-temp-pwd:hover{background:#4338ca;color:white}
+    .btn-reset-link:hover{background:#4338ca;color:white}
+    /* Reset password screen */
+    #reset-screen{display:none;min-height:100vh;align-items:center;justify-content:center;padding:1.5rem;
+      background:linear-gradient(145deg,#0f172a 0%,#1e3a5f 50%,#1d4ed8 100%)}
+    #reset-screen.show{display:flex}
+    .reset-card{background:var(--white);border-radius:20px;padding:2.5rem;max-width:400px;width:100%;
+      text-align:center;box-shadow:var(--shlg)}
+    .reset-card .icon{width:64px;height:64px;background:#dbeafe;border-radius:18px;display:inline-flex;
+      align-items:center;justify-content:center;font-size:2rem;margin-bottom:1rem}
+    .reset-err{background:var(--red-l);color:var(--red);border-radius:var(--r);padding:.625rem .875rem;
+      font-size:.875rem;margin-bottom:1rem;display:none;text-align:left}
+    .reset-err.show{display:block}
+    .reset-ok{background:var(--green-l);color:var(--green-d);border-radius:var(--r);padding:.875rem 1rem;
+      font-size:.9rem;margin-bottom:1rem;display:none;text-align:left;line-height:1.5}
+    .reset-ok.show{display:block}
     .pending-card{background:var(--white);border-radius:20px;padding:2.5rem;max-width:400px;width:100%;
       text-align:center;box-shadow:var(--shlg)}
     .pending-icon{font-size:3rem;margin-bottom:1rem}
@@ -413,6 +426,28 @@
   </div>
 </div>
 
+<!-- ═══ RESET DE CONTRASEÑA (desde enlace) ══════════════════════════════════ -->
+<div id="reset-screen">
+  <div class="reset-card">
+    <div class="icon">🔐</div>
+    <h2 style="font-family:var(--fh);font-size:1.75rem;font-weight:800;color:var(--g900);margin-bottom:.5rem">Nueva contraseña</h2>
+    <p id="reset-welcome" style="color:var(--g600);font-size:.9rem;line-height:1.5;margin-bottom:1.25rem"></p>
+    <div id="reset-err" class="reset-err"></div>
+    <div id="reset-ok" class="reset-ok"></div>
+    <div id="reset-form">
+      <div class="form-group" style="text-align:left">
+        <label>Nueva contraseña</label>
+        <input id="reset-new" type="password" placeholder="Mínimo 4 caracteres"/>
+      </div>
+      <div class="form-group" style="text-align:left">
+        <label>Repite la contraseña</label>
+        <input id="reset-rep" type="password" placeholder="Repite la contraseña"/>
+      </div>
+      <button class="btn-auth" onclick="doResetPassword()">Guardar contraseña →</button>
+    </div>
+  </div>
+</div>
+
 <!-- ═══ APP ═══════════════════════════════════════════════════════════════ -->
 <div id="app-screen">
   <header>
@@ -625,18 +660,18 @@
   </div>
 </div>
 
-<!-- ═══ MODAL: CLAVE TEMPORAL ══════════════════════════════════════════════ -->
-<div id="modal-temp-pwd" class="overlay">
-  <div class="modal" style="max-width:380px;text-align:center">
-    <div class="modal-icon" style="background:#ede9fe;margin:0 auto 1rem">🔑</div>
-    <h3 class="modal-title">Clave temporal generada</h3>
-    <p class="modal-sub">Comunica esta clave al vecino por WhatsApp o teléfono.<br>
-      <strong>Solo se muestra una vez.</strong></p>
-    <div class="temp-pwd-box">
-      <span class="temp-pwd-value" id="temp-pwd-value">——</span>
-      <span class="temp-pwd-note">El usuario deberá cambiarla al iniciar sesión</span>
+<!-- ═══ MODAL: ENLACE DE RESETEO ════════════════════════════════════════════ -->
+<div id="modal-reset-link" class="overlay">
+  <div class="modal" style="max-width:440px;text-align:center">
+    <div class="modal-icon" style="background:#dbeafe;margin:0 auto 1rem">🔗</div>
+    <h3 class="modal-title">Enlace de reseteo</h3>
+    <p class="modal-sub">Envía este enlace al vecino por WhatsApp.<br>
+      Caduca en <strong>24 horas</strong> y es de un <strong>solo uso</strong>.</p>
+    <div class="reset-link-box">
+      <span class="reset-link-value" id="reset-link-value">—</span>
+      <span class="reset-link-note">⏱ Válido 24h · 🔒 Un solo uso · El admin nunca ve la contraseña</span>
     </div>
-    <button class="btn-copy" onclick="copyTempPwd()">📋 Copiar clave</button>
+    <button class="btn-copy" onclick="copyResetLink()">📋 Copiar enlace</button>
     <div class="modal-actions" style="margin-top:1.25rem">
       <button class="btn-mok" onclick="closeModals()">Entendido</button>
     </div>
@@ -778,6 +813,7 @@ function doLogout() {
   document.getElementById('app-screen').classList.remove('show');
   document.getElementById('pending-screen').classList.remove('show');
   document.getElementById('chpass-screen').classList.remove('show');
+  document.getElementById('reset-screen').classList.remove('show');
   document.getElementById('auth-screen').style.display='flex';
 }
 
@@ -1249,7 +1285,7 @@ function renderUserList(users) {
         <div class="edit-actions">
           <button class="btn-edit-cancel" onclick="toggleUserEdit(${u.id},null)">Cancelar</button>
           <button class="btn-edit-save" onclick="saveUserEdit(${u.id})">💾 Guardar</button>
-          <button class="btn-temp-pwd" onclick="generateTempPassword(${u.id},'${escHtml(u.name).replace(/'/g,'')}')">🔑 Clave temp.</button>
+          <button class="btn-reset-link" onclick="generateResetLink(${u.id},'${escHtml(u.name).replace(/'/g,'')}')">🔗 Resetear clave</button>
           <button class="btn-edit-delete" onclick="deleteUser(${u.id},'${escHtml(u.name).replace(/'/g,'')}')">🗑 Eliminar</button>
         </div>
       </div>`;
@@ -1297,22 +1333,22 @@ async function setApproval(id, approved, btn) {
   } catch(e) { toast(e.message,'error'); btn.disabled=false; }
 }
 
-async function generateTempPassword(id, name) {
-  if (!confirm(`¿Generar una clave temporal para "${name}"?\n\nSu contraseña actual quedará inhabilitada y deberá crear una nueva al iniciar sesión.`)) return;
+async function generateResetLink(id, name) {
+  if (!confirm(`¿Generar un enlace de reseteo de contraseña para "${name}"?\n\nEl enlace será válido 24h y de un solo uso.`)) return;
   try {
-    const data = await api('POST', `/admin/users/${id}/temp-password`, {});
-    document.getElementById('temp-pwd-value').textContent = data.temp_password;
-    document.getElementById('modal-temp-pwd').classList.add('show');
-    S._tempPwd = data.temp_password;
+    const data = await api('POST', `/admin/users/${id}/reset-link`, {});
+    document.getElementById('reset-link-value').textContent = data.reset_url;
+    S._resetLink = data.reset_url;
+    document.getElementById('modal-reset-link').classList.add('show');
   } catch(e) { toast(e.message,'error'); }
 }
 
-function copyTempPwd() {
-  if (!S._tempPwd) return;
-  navigator.clipboard.writeText(S._tempPwd).then(() => {
-    toast('Clave copiada al portapapeles','success');
+function copyResetLink() {
+  if (!S._resetLink) return;
+  navigator.clipboard.writeText(S._resetLink).then(() => {
+    toast('Enlace copiado al portapapeles ✓','success');
   }).catch(() => {
-    toast('No se pudo copiar — cópiala manualmente','error');
+    toast('No se pudo copiar — cópialo manualmente','error');
   });
 }
 
@@ -1405,24 +1441,83 @@ document.getElementById('r-pass').addEventListener('keydown',e=>e.key==='Enter'&
 
 // ─── INIT ──────────────────────────────────────────────────
 (function init() {
+  // Check if this is a password reset link (?token=xxx)
+  const urlParams = new URLSearchParams(window.location.search);
+  const resetToken = urlParams.get('token');
+  if (resetToken) {
+    showResetScreen(resetToken);
+    return;
+  }
+
   const token = localStorage.getItem('padel_token');
   const user  = localStorage.getItem('padel_user');
   if (token && user) {
     try {
       S.token = token;
       S.user  = JSON.parse(user);
-      // Decode token payload to check force_password_change
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      if (payload.force_password_change) {
-        showChangePassword();
-      } else {
-        showApp();
-      }
+      showApp();
       return;
     } catch {}
   }
   document.getElementById('auth-screen').style.display='flex';
 })();
+
+// ─── RESET PASSWORD (desde enlace externo) ─────────────────────────────────
+let S_resetToken = null;
+
+async function showResetScreen(token) {
+  S_resetToken = token;
+  // Hide everything else
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('pending-screen').classList.remove('show');
+  document.getElementById('chpass-screen').classList.remove('show');
+  document.getElementById('app-screen').classList.remove('show');
+  const screen = document.getElementById('reset-screen');
+  screen.classList.add('show');
+
+  // Validate token with server
+  try {
+    const data = await fetch(`/api/auth/reset-token/${token}`).then(r => r.json());
+    if (data.error) {
+      document.getElementById('reset-welcome').textContent = '';
+      document.getElementById('reset-err').textContent = data.error;
+      document.getElementById('reset-err').classList.add('show');
+      document.getElementById('reset-form').style.display = 'none';
+    } else {
+      document.getElementById('reset-welcome').textContent =
+        `Hola ${data.name}, crea tu nueva contraseña para acceder al Club El Real de Espartinas.`;
+    }
+  } catch(e) {
+    document.getElementById('reset-err').textContent = 'Error al validar el enlace. Inténtalo de nuevo.';
+    document.getElementById('reset-err').classList.add('show');
+    document.getElementById('reset-form').style.display = 'none';
+  }
+}
+
+async function doResetPassword() {
+  const newPwd = document.getElementById('reset-new').value;
+  const repPwd = document.getElementById('reset-rep').value;
+  const errEl  = document.getElementById('reset-err');
+  const okEl   = document.getElementById('reset-ok');
+  errEl.classList.remove('show'); okEl.classList.remove('show');
+
+  if (newPwd.length < 4) { errEl.textContent='Mínimo 4 caracteres'; errEl.classList.add('show'); return; }
+  if (newPwd !== repPwd)  { errEl.textContent='Las contraseñas no coinciden'; errEl.classList.add('show'); return; }
+
+  try {
+    await fetch('/api/auth/reset-password', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ token: S_resetToken, new_password: newPwd })
+    }).then(async r => { const d = await r.json(); if (!r.ok) throw new Error(d.error); return d; });
+
+    document.getElementById('reset-form').style.display = 'none';
+    okEl.innerHTML = '✅ ¡Contraseña actualizada! <a href="/" style="color:var(--green-d);font-weight:700">Ir al inicio de sesión →</a>';
+    okEl.classList.add('show');
+    // Clean URL and redirect to login after 2s
+    setTimeout(() => { window.location.href = '/'; }, 2500);
+  } catch(e) { errEl.textContent = e.message; errEl.classList.add('show'); }
+}
 </script>
 </body>
 </html>
