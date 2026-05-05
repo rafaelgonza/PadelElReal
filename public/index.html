@@ -22,7 +22,7 @@
     button{cursor:pointer}
 
     /* AUTH */
-    #auth-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1.5rem;
+    #auth-screen{min-height:100vh;display:none;align-items:center;justify-content:center;padding:1.5rem;
       background:linear-gradient(145deg,#0d3d1f 0%,#1a6b3a 50%,#2d9955 100%);position:relative;overflow:hidden}
     #auth-screen::before{content:'';position:absolute;inset:0;opacity:.04;
       background:repeating-linear-gradient(45deg,#fff 0,#fff 1px,transparent 0,transparent 50%);background-size:20px 20px}
@@ -683,7 +683,7 @@
 <script>
 // ─── STATE ─────────────────────────────────────────────────
 const S = { token:null, user:null, currentDate:null, slots:[], reservations:[], config:null,
-  pendingReserve:null, pendingCancel:null, allHistory:[], weatherCache:{} };
+  pendingReserve:null, pendingCancel:null, allHistory:[], weatherCache:{}, resetToken:null };
 
 const MONTHS = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
 const DAYS   = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
@@ -796,25 +796,20 @@ async function doChangePassword() {
 
 function showPending() {
   document.getElementById('auth-screen').style.display = 'none';
-  document.getElementById('pending-screen').classList.add('show');
-  document.getElementById('app-screen').classList.remove('show');
+  document.getElementById('reset-screen').classList.remove('show');
   document.getElementById('chpass-screen').classList.remove('show');
+  document.getElementById('app-screen').classList.remove('show');
+  document.getElementById('pending-screen').classList.add('show');
 }
 
 function backToLogin() {
-  document.getElementById('pending-screen').classList.remove('show');
-  document.getElementById('chpass-screen').classList.remove('show');
-  document.getElementById('auth-screen').style.display = 'flex';
+  showAuthScreen();
 }
 
 function doLogout() {
   S.token=null; S.user=null;
   localStorage.removeItem('padel_token'); localStorage.removeItem('padel_user');
-  document.getElementById('app-screen').classList.remove('show');
-  document.getElementById('pending-screen').classList.remove('show');
-  document.getElementById('chpass-screen').classList.remove('show');
-  document.getElementById('reset-screen').classList.remove('show');
-  document.getElementById('auth-screen').style.display='flex';
+  showAuthScreen();
 }
 
 function showApp() {
@@ -1440,6 +1435,14 @@ document.getElementById('l-pass').addEventListener('keydown',e=>e.key==='Enter'&
 document.getElementById('r-pass').addEventListener('keydown',e=>e.key==='Enter'&&doRegister());
 
 // ─── INIT ──────────────────────────────────────────────────
+function showAuthScreen() {
+  document.getElementById('auth-screen').style.display = 'flex';
+  document.getElementById('pending-screen').classList.remove('show');
+  document.getElementById('chpass-screen').classList.remove('show');
+  document.getElementById('reset-screen').classList.remove('show');
+  document.getElementById('app-screen').classList.remove('show');
+}
+
 (function init() {
   // Check if this is a password reset link (?token=xxx)
   const urlParams = new URLSearchParams(window.location.search);
@@ -1459,14 +1462,12 @@ document.getElementById('r-pass').addEventListener('keydown',e=>e.key==='Enter'&
       return;
     } catch {}
   }
-  document.getElementById('auth-screen').style.display='flex';
+  showAuthScreen();
 })();
 
 // ─── RESET PASSWORD (desde enlace externo) ─────────────────────────────────
-let S_resetToken = null;
-
 async function showResetScreen(token) {
-  S_resetToken = token;
+  S.resetToken = token;
   // Hide everything else
   document.getElementById('auth-screen').style.display = 'none';
   document.getElementById('pending-screen').classList.remove('show');
@@ -1508,7 +1509,7 @@ async function doResetPassword() {
     await fetch('/api/auth/reset-password', {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ token: S_resetToken, new_password: newPwd })
+      body: JSON.stringify({ token: S.resetToken, new_password: newPwd })
     }).then(async r => { const d = await r.json(); if (!r.ok) throw new Error(d.error); return d; });
 
     document.getElementById('reset-form').style.display = 'none';
