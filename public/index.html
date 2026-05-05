@@ -1432,8 +1432,7 @@ async function importUsers(input) {
 
   try {
     const text  = await file.text();
-    const lines = text.split(/?
-/).filter(l => l.trim());
+    const lines = text.split(/\r?\n/).filter(l => l.trim());
     if (lines.length < 2) throw new Error('El CSV está vacío o solo tiene cabecera');
 
     // Parse CSV header
