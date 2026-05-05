@@ -11,6 +11,25 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET || 'padel-jwt-secret-change-me-in-production-2024';
 
+// ─── LOGGER ───────────────────────────────────────────────────────────────────
+const LOG_LEVEL = process.env.LOG_LEVEL || 'info'; // debug | info | warn | error
+const LEVELS = { debug: 0, info: 1, warn: 2, error: 3 };
+const logger = {
+  _fmt(level, msg, meta) {
+    const ts = new Date().toISOString();
+    const base = `[${ts}] [${level.toUpperCase().padEnd(5)}] ${msg}`;
+    return meta ? `${base} | ${JSON.stringify(meta)}` : base;
+  },
+  debug(msg, meta) { if (LEVELS[LOG_LEVEL] <= 0) console.debug(this._fmt('debug', msg, meta)); },
+  info (msg, meta) { if (LEVELS[LOG_LEVEL] <= 1) console.info (this._fmt('info',  msg, meta)); },
+  warn (msg, meta) { if (LEVELS[LOG_LEVEL] <= 2) console.warn (this._fmt('warn',  msg, meta)); },
+  error(msg, meta) { if (LEVELS[LOG_LEVEL] <= 3) console.error(this._fmt('error', msg, meta)); },
+};
+
+// ─── ERRORES GLOBALES ─────────────────────────────────────────────────────────
+process.on('uncaughtException',  e => { logger.error('UncaughtException',  { message: e.message, stack: e.stack }); process.exit(1); });
+process.on('unhandledRejection', e => { logger.error('UnhandledRejection', { message: String(e) }); });
+
 const DB_PATH = process.env.DB_PATH || path.join(__dirname, 'padel.db');
 const dbDir = path.dirname(DB_PATH);
 if (!fs.existsSync(dbDir)) fs.mkdirSync(dbDir, { recursive: true });
@@ -92,13 +111,28 @@ try {
   if (!db.prepare('SELECT id FROM users WHERE username = ?').get('admin')) {
     db.prepare('INSERT INTO users (username, name, password, is_admin, approved, calle, numero) VALUES (?,?,?,1,1,?,?)')
       .run('admin', 'Administrador', bcrypt.hashSync('admin123', 10), 'Club El Real', '1');
-    console.log('Admin creado: admin / admin123');
+    logger.info('Admin por defecto creado: admin / admin123');
   }
+  logger.info('Base de datos inicializada', { path: DB_PATH });
 })();
 
 // ─── MIDDLEWARE ───────────────────────────────────────────────────────────────
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
+
+// HTTP request logger
+app.use((req, res, next) => {
+  if (req.path.startsWith('/api')) {
+    const start = Date.now();
+    res.on('finish', () => {
+      const ms    = Date.now() - start;
+      const level = res.statusCode >= 500 ? 'error' : res.statusCode >= 400 ? 'warn' : 'info';
+      const user  = req.user ? `${req.user.username}(${req.user.id})` : 'anon';
+      logger[level](`${req.method} ${req.path} ${res.statusCode} ${ms}ms`, { user, ip: req.ip });
+    });
+  }
+  next();
+});
 
 const authenticate = (req, res, next) => {
   const auth = req.headers.authorization;
@@ -176,23 +210,35 @@ app.post('/api/auth/register', (req, res) => {
   if (taken) return res.status(400).json({ error: 'Ya existe un usuario registrado con esa dirección. Si crees que es un error, contacta con el administrador del club.' });
 
   try {
+    const uname = username.trim().toLowerCase();
     db.prepare('INSERT INTO users (username, name, password, calle, numero, approved) VALUES (?,?,?,?,?,0)')
-      .run(username.trim().toLowerCase(), name.trim(), bcrypt.hashSync(password, 10), calle.trim(), numero.trim());
+      .run(uname, name.trim(), bcrypt.hashSync(password, 10), calle.trim(), numero.trim());
+    logger.info('Registro nuevo usuario (pendiente aprobación)', { username: uname, calle: calle.trim(), numero: numero.trim() });
     res.json({ pending: true });
   } catch(e) {
-    if (e.message.includes('UNIQUE')) return res.status(400).json({ error: 'Ese nombre de usuario ya existe' });
+    if (e.message.includes('UNIQUE')) {
+      logger.warn('Registro fallido: usuario duplicado', { username: username.trim().toLowerCase() });
+      return res.status(400).json({ error: 'Ese nombre de usuario ya existe' });
+    }
+    logger.error('Error en registro', { error: e.message });
     res.status(500).json({ error: 'Error del servidor' });
   }
 });
 
 app.post('/api/auth/login', (req, res) => {
   const { username, password } = req.body || {};
-  const u = db.prepare('SELECT * FROM users WHERE username=?').get(username?.trim().toLowerCase());
-  if (!u || !bcrypt.compareSync(password, u.password))
+  const uname = username?.trim().toLowerCase();
+  const u = db.prepare('SELECT * FROM users WHERE username=?').get(uname);
+  if (!u || !bcrypt.compareSync(password, u.password)) {
+    logger.warn('Login fallido: credenciales incorrectas', { username: uname, ip: req.ip });
     return res.status(401).json({ error: 'Usuario o contraseña incorrectos' });
-  if (!u.is_admin && !u.approved)
+  }
+  if (!u.is_admin && !u.approved) {
+    logger.info('Login denegado: usuario pendiente de aprobación', { username: uname });
     return res.status(403).json({ error: 'PENDIENTE_APROBACION' });
+  }
   const user = { id: u.id, username: u.username, name: u.name, is_admin: u.is_admin, calle: u.calle, numero: u.numero };
+  logger.info('Login correcto', { username: uname, is_admin: !!u.is_admin });
   res.json({ token: jwt.sign(user, JWT_SECRET, { expiresIn: '30d' }), user });
 });
 
@@ -226,9 +272,14 @@ app.post('/api/reservations', authenticate, approvedOnly, (req, res) => {
   }
   try {
     const r = db.prepare('INSERT INTO reservations (user_id,court_id,date,slot_index) VALUES (?,?,?,?)').run(req.user.id, Number(court_id), date, idx);
+    logger.info('Reserva creada', { reservationId: r.lastInsertRowid, userId: req.user.id, username: req.user.username, courtId: Number(court_id), date, slotIndex: idx });
     res.json({ id: r.lastInsertRowid, message: '¡Reserva creada!' });
   } catch(e) {
-    if (e.message.includes('UNIQUE')) return res.status(409).json({ error: 'Esa pista ya está reservada en ese horario' });
+    if (e.message.includes('UNIQUE')) {
+      logger.warn('Reserva fallida: pista ya ocupada', { userId: req.user.id, courtId: Number(court_id), date, slotIndex: idx });
+      return res.status(409).json({ error: 'Esa pista ya está reservada en ese horario' });
+    }
+    logger.error('Error creando reserva', { error: e.message, userId: req.user.id });
     res.status(500).json({ error: 'Error del servidor' });
   }
 });
@@ -236,8 +287,12 @@ app.post('/api/reservations', authenticate, approvedOnly, (req, res) => {
 app.delete('/api/reservations/:id', authenticate, approvedOnly, (req, res) => {
   const r = db.prepare('SELECT * FROM reservations WHERE id=?').get(req.params.id);
   if (!r) return res.status(404).json({ error: 'Reserva no encontrada' });
-  if (r.user_id !== req.user.id && !req.user.is_admin) return res.status(403).json({ error: 'Sin permiso' });
+  if (r.user_id !== req.user.id && !req.user.is_admin) {
+    logger.warn('Intento de borrar reserva ajena', { requestUser: req.user.id, ownerUser: r.user_id, reservationId: r.id });
+    return res.status(403).json({ error: 'Sin permiso' });
+  }
   db.prepare('DELETE FROM reservations WHERE id=?').run(req.params.id);
+  logger.info('Reserva eliminada', { reservationId: r.id, deletedBy: req.user.username, isAdmin: !!req.user.is_admin, courtId: r.court_id, date: r.date });
   res.json({ message: 'Reserva eliminada' });
 });
 
@@ -276,6 +331,7 @@ app.put('/api/config', authenticate, adminOnly, (req, res) => {
     summer_start_month=@summer_start_month, summer_start_day=@summer_start_day,
     winter_start_month=@winter_start_month, winter_start_day=@winter_start_day
     WHERE id=1`).run(vals);
+  logger.info('Configuración de horarios actualizada', { updatedBy: req.user.username, ...vals });
   res.json({ message: 'Configuración guardada' });
 });
 
@@ -288,8 +344,10 @@ app.patch('/api/admin/users/:id/approval', authenticate, adminOnly, (req, res) =
   const u = db.prepare('SELECT id,is_admin FROM users WHERE id=?').get(req.params.id);
   if (!u) return res.status(404).json({ error: 'Usuario no encontrado' });
   if (u.is_admin) return res.status(400).json({ error: 'No se puede modificar al admin' });
-  db.prepare('UPDATE users SET approved=? WHERE id=?').run(req.body.approved ? 1 : 0, req.params.id);
-  res.json({ message: req.body.approved ? 'Acceso concedido' : 'Acceso denegado' });
+  const approved = req.body.approved ? 1 : 0;
+  db.prepare('UPDATE users SET approved=? WHERE id=?').run(approved, req.params.id);
+  logger.info(approved ? 'Acceso concedido a usuario' : 'Acceso denegado a usuario', { targetUserId: req.params.id, adminUser: req.user.username });
+  res.json({ message: approved ? 'Acceso concedido' : 'Acceso denegado' });
 });
 
 app.patch('/api/admin/users/:id', authenticate, adminOnly, (req, res) => {
@@ -308,9 +366,14 @@ app.patch('/api/admin/users/:id', authenticate, adminOnly, (req, res) => {
       db.prepare('UPDATE users SET name=?, username=? WHERE id=?')
         .run(name.trim(), username.trim().toLowerCase(), req.params.id);
     }
+    logger.info('Usuario editado por admin', { targetUserId: req.params.id, adminUser: req.user.username, passwordChanged: !!password });
     res.json({ message: 'Usuario actualizado' });
   } catch(e) {
-    if (e.message.includes('UNIQUE')) return res.status(400).json({ error: 'Ese nombre de usuario ya existe' });
+    if (e.message.includes('UNIQUE')) {
+      logger.warn('Edición de usuario fallida: username duplicado', { targetUserId: req.params.id });
+      return res.status(400).json({ error: 'Ese nombre de usuario ya existe' });
+    }
+    logger.error('Error editando usuario', { error: e.message });
     res.status(500).json({ error: 'Error del servidor' });
   }
 });
@@ -334,4 +397,19 @@ app.get('/api/admin/history', authenticate, adminOnly, (req, res) => {
 });
 
 app.get('*', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
-app.listen(PORT, () => console.log(`🎾 Club El Real de Espartinas — http://localhost:${PORT}`));
+
+// ─── GLOBAL ERROR HANDLER ─────────────────────────────────────────────────────
+app.use((err, req, res, next) => {
+  logger.error('Error no controlado en ruta', { method: req.method, path: req.path, error: err.message, stack: err.stack });
+  res.status(500).json({ error: 'Error interno del servidor' });
+});
+
+app.listen(PORT, () => {
+  logger.info('🎾 Club El Real de Espartinas arrancado', {
+    port: PORT,
+    db: DB_PATH,
+    timezone: process.env.TZ,
+    logLevel: LOG_LEVEL,
+    nodeEnv: process.env.NODE_ENV || 'development',
+  });
+});
