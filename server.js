@@ -63,7 +63,12 @@ db.exec(`
     summer_start_month  INTEGER DEFAULT 6,
     summer_start_day    INTEGER DEFAULT 1,
     winter_start_month  INTEGER DEFAULT 10,
-    winter_start_day    INTEGER DEFAULT 1
+    winter_start_day    INTEGER DEFAULT 1,
+    -- Franja de descanso (minutos desde medianoche, 0/0 = sin descanso)
+    winter_break_start  INTEGER DEFAULT 0,
+    winter_break_end    INTEGER DEFAULT 0,
+    summer_break_start  INTEGER DEFAULT 0,
+    summer_break_end    INTEGER DEFAULT 0
   );
   CREATE TABLE IF NOT EXISTS reservations (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -92,6 +97,10 @@ try { db.exec('ALTER TABLE users ADD COLUMN calle TEXT NOT NULL DEFAULT ""'); } 
 try { db.exec('ALTER TABLE users ADD COLUMN numero TEXT NOT NULL DEFAULT ""'); } catch {}
 try { db.exec('ALTER TABLE users ADD COLUMN approved INTEGER NOT NULL DEFAULT 0'); } catch {}
 try { db.exec('ALTER TABLE users ADD COLUMN force_password_change INTEGER NOT NULL DEFAULT 0'); } catch {}
+try { db.exec('ALTER TABLE time_config ADD COLUMN winter_break_start INTEGER DEFAULT 0'); } catch {}
+try { db.exec('ALTER TABLE time_config ADD COLUMN winter_break_end   INTEGER DEFAULT 0'); } catch {}
+try { db.exec('ALTER TABLE time_config ADD COLUMN summer_break_start INTEGER DEFAULT 0'); } catch {}
+try { db.exec('ALTER TABLE time_config ADD COLUMN summer_break_end   INTEGER DEFAULT 0'); } catch {}
 db.exec('UPDATE users SET approved = 1 WHERE is_admin = 1');
 
 // Migrate old single-schedule config to new winter/summer schema
@@ -217,11 +226,20 @@ function getActiveConfig(dateStr) {
   }
 
   return {
-    start_hour:  isSummer ? cfg.summer_start_hour   : cfg.winter_start_hour,
+    start_hour:   isSummer ? cfg.summer_start_hour   : cfg.winter_start_hour,
     start_minute: isSummer ? cfg.summer_start_minute : cfg.winter_start_minute,
     slots_count:  isSummer ? cfg.summer_slots_count  : cfg.winter_slots_count,
+    break_start:  isSummer ? cfg.summer_break_start  : cfg.winter_break_start,
+    break_end:    isSummer ? cfg.summer_break_end    : cfg.winter_break_end,
     active_season: isSummer ? 'summer' : 'winter',
   };
+}
+
+// Devuelve true si el turno (startMin, endMin) solapa con la franja de descanso
+function slotInBreak(cfg, slotStartMin, slotEndMin) {
+  if (!cfg.break_start && !cfg.break_end) return false;
+  if (cfg.break_start >= cfg.break_end) return false;
+  return slotStartMin < cfg.break_end && slotEndMin > cfg.break_start;
 }
 
 function todayString() { return new Date().toISOString().split('T')[0]; }
@@ -316,6 +334,9 @@ app.post('/api/reservations', authenticate, approvedOnly, (req, res) => {
   if (isNaN(idx) || idx < 0 || idx >= cfg.slots_count) return res.status(400).json({ error: 'Horario no válido' });
   if (date === todayString() && nowMinutes() >= cfg.start_hour*60+cfg.start_minute+idx*90)
     return res.status(400).json({ error: 'Esa hora ya ha pasado' });
+  const slotStart = cfg.start_hour*60 + cfg.start_minute + idx*90;
+  if (slotInBreak(cfg, slotStart, slotStart+90))
+    return res.status(400).json({ error: 'Ese turno está bloqueado por la franja de descanso del mediodía' });
   const userRes = db.prepare('SELECT slot_index FROM reservations WHERE user_id=? AND date=?').all(req.user.id, date);
   for (const r of userRes) {
     if (Math.abs(r.slot_index - idx) <= 1)
@@ -358,7 +379,8 @@ app.put('/api/config', authenticate, adminOnly, (req, res) => {
   const b = req.body || {};
   const fields = ['winter_start_hour','winter_start_minute','winter_slots_count',
                   'summer_start_hour','summer_start_minute','summer_slots_count',
-                  'summer_start_month','summer_start_day','winter_start_month','winter_start_day'];
+                  'summer_start_month','summer_start_day','winter_start_month','winter_start_day',
+                  'winter_break_start','winter_break_end','summer_break_start','summer_break_end'];
   const vals = {};
   for (const f of fields) { vals[f] = Number(b[f]); if (isNaN(vals[f])) return res.status(400).json({ error: `Campo inválido: ${f}` }); }
 
@@ -375,12 +397,20 @@ app.put('/api/config', authenticate, adminOnly, (req, res) => {
     if (mon < 1 || mon > 12)    return res.status(400).json({ error: `Mes de inicio de ${season} inválido` });
     if (day < 1 || day > 31)    return res.status(400).json({ error: `Día de inicio de ${season} inválido` });
   }
+  for (const season of ['summer','winter']) {
+    const bs = vals[`${season}_break_start`], be = vals[`${season}_break_end`];
+    if (bs < 0 || bs > 1439)    return res.status(400).json({ error: `Hora de inicio de descanso de ${season} inválida` });
+    if (be < 0 || be > 1440)    return res.status(400).json({ error: `Hora de fin de descanso de ${season} inválida` });
+    if (be > 0 && bs >= be)     return res.status(400).json({ error: `El fin del descanso de ${season} debe ser posterior al inicio` });
+  }
 
   db.prepare(`UPDATE time_config SET
     winter_start_hour=@winter_start_hour, winter_start_minute=@winter_start_minute, winter_slots_count=@winter_slots_count,
     summer_start_hour=@summer_start_hour, summer_start_minute=@summer_start_minute, summer_slots_count=@summer_slots_count,
     summer_start_month=@summer_start_month, summer_start_day=@summer_start_day,
-    winter_start_month=@winter_start_month, winter_start_day=@winter_start_day
+    winter_start_month=@winter_start_month, winter_start_day=@winter_start_day,
+    winter_break_start=@winter_break_start, winter_break_end=@winter_break_end,
+    summer_break_start=@summer_break_start, summer_break_end=@summer_break_end
     WHERE id=1`).run(vals);
   logger.info('Configuración de horarios actualizada', { updatedBy: req.user.username, ...vals });
   res.json({ message: 'Configuración guardada' });
