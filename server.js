@@ -139,7 +139,7 @@ try {
 
 // ─── MIDDLEWARE ───────────────────────────────────────────────────────────────
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public'), { index: false }));
 
 // HTTP request logger
 app.use((req, res, next) => {
