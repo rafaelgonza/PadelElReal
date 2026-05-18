@@ -114,6 +114,7 @@ try { db.exec('ALTER TABLE time_config ADD COLUMN summer_start_month  INTEGER DE
 try { db.exec('ALTER TABLE time_config ADD COLUMN summer_start_day    INTEGER DEFAULT 1');  } catch {}
 try { db.exec('ALTER TABLE time_config ADD COLUMN winter_start_month  INTEGER DEFAULT 10'); } catch {}
 try { db.exec('ALTER TABLE time_config ADD COLUMN winter_start_day    INTEGER DEFAULT 1');  } catch {}
+try { db.exec("ALTER TABLE time_config ADD COLUMN theme TEXT DEFAULT 'mediterranean'"); } catch {}
 
 // If old schema had start_hour/start_minute/slots_count, copy to winter
 try {
@@ -642,7 +643,27 @@ app.post('/api/admin/change-password', authenticate, adminOnly, (req, res) => {
   res.json({ message: 'Contraseña actualizada correctamente' });
 });
 
-app.get('*', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
+// ─── THEME ───────────────────────────────────────────────────────────────────
+app.get('/api/theme', (req, res) => {
+  const cfg = db.prepare('SELECT theme FROM time_config WHERE id=1').get();
+  res.json({ theme: cfg?.theme || 'mediterranean' });
+});
+
+app.post('/api/admin/theme', authenticate, adminOnly, (req, res) => {
+  const { theme } = req.body || {};
+  if (!['mediterranean', 'classic'].includes(theme))
+    return res.status(400).json({ error: 'Tema no válido' });
+  db.prepare("UPDATE time_config SET theme=? WHERE id=1").run(theme);
+  logger.info('Tema cambiado', { theme, adminUser: req.user.username });
+  res.json({ message: 'Tema actualizado', theme });
+});
+
+app.get('*', (req, res) => {
+  const cfg = db.prepare('SELECT theme FROM time_config WHERE id=1').get();
+  const theme = cfg?.theme || 'mediterranean';
+  const file  = theme === 'classic' ? 'index_classic.html' : 'index.html';
+  res.sendFile(path.join(__dirname, 'public', file));
+});
 
 // ─── GLOBAL ERROR HANDLER ─────────────────────────────────────────────────────
 app.use((err, req, res, next) => {

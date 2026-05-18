@@ -376,6 +376,17 @@
       .header-brand h2{font-size:.9rem}
       .legend{gap:.375rem}
     }
+
+    .theme-toggle-box{background:var(--bg);border-radius:var(--r);padding:1.25rem;border:1.5px solid var(--border);margin-bottom:1rem}
+    .theme-toggle-box h4{font-size:.9rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:1rem;padding-bottom:.5rem;border-bottom:1.5px solid var(--border)}
+    .theme-cards{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:.75rem}
+    .theme-card{border-radius:var(--r);padding:.875rem;border:2.5px solid var(--border);cursor:pointer;transition:all .2s;text-align:center;background:var(--surface)}
+    .theme-card.active{border-color:var(--prime-m);background:var(--prime-ll)}
+    .theme-card:hover:not(.active){border-color:var(--border-m);transform:translateY(-1px)}
+    .theme-card .tc-icon{font-size:1.75rem;margin-bottom:.375rem}
+    .theme-card .tc-name{font-size:.82rem;font-weight:800;color:var(--text)}
+    .theme-card .tc-desc{font-size:.7rem;color:var(--muted);font-weight:500;margin-top:.15rem}
+    .theme-card.active .tc-name{color:var(--primary)}
   </style>
 </head>
 <body>
@@ -671,7 +682,24 @@
         <div class="form-group"><label>Repite la nueva contraseña</label><input id="adm-rep-pass" type="password" placeholder="Repite la nueva contraseña"/></div>
         <p class="account-err" id="adm-pass-err"></p>
         <p class="account-ok" id="adm-pass-ok"></p>
-        <div class="modal-actions" style="margin-top:.75rem">
+
+      <div class="theme-toggle-box">
+        <h4>🎨 Diseño de la aplicación</h4>
+        <div class="theme-cards">
+          <div class="theme-card active" id="tc-mediterranean" onclick="switchTheme('mediterranean')">
+            <div class="tc-icon">🌿</div>
+            <div class="tc-name">Mediterráneo</div>
+            <div class="tc-desc">Cálido y luminoso</div>
+          </div>
+          <div class="theme-card " id="tc-classic" onclick="switchTheme('classic')">
+            <div class="tc-icon">🌲</div>
+            <div class="tc-name">Clásico</div>
+            <div class="tc-desc">Verde natural</div>
+          </div>
+        </div>
+        <p id="theme-msg" style="font-size:.78rem;color:var(--muted);font-weight:500;text-align:center"></p>
+      </div>
+      <div class="modal-actions" style="margin-top:.75rem">
           <button class="btn-mc" onclick="closeModals()">Cerrar</button>
           <button class="btn-mok" onclick="changeAdminPassword()">💾 Cambiar contraseña</button>
         </div>
@@ -1660,6 +1688,21 @@ async function doResetPassword() {
   } catch(e) { errEl.textContent = e.message; errEl.classList.add('show'); }
 }
 
+
+async function switchTheme(theme) {
+  document.querySelectorAll('.theme-card').forEach(c => c.classList.remove('active'));
+  document.getElementById('tc-' + theme)?.classList.add('active');
+  const msg = document.getElementById('theme-msg');
+  if (msg) msg.textContent = 'Cambiando diseño…';
+  try {
+    await api('POST', '/admin/theme', { theme });
+    if (msg) msg.textContent = '✓ Diseño actualizado. Recargando…';
+    setTimeout(() => window.location.reload(), 900);
+  } catch(e) {
+    if (msg) msg.textContent = '❌ ' + e.message;
+    toast(e.message, 'error');
+  }
+}
 </script>
 </body>
 </html>
