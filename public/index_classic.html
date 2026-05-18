@@ -3,429 +3,351 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>🎾 Club El Real de Espartinas</title>
+  <title>🎾 Club El Real de Espartinas — Reservas</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     :root{
-      --bg:      #09090b;
-      --s1:      #18181b;
-      --s2:      #27272a;
-      --s3:      #3f3f46;
-      --green:   #22c55e;
-      --green-d: #16a34a;
-      --green-l: rgba(34,197,94,.12);
-      --green-ll:rgba(34,197,94,.06);
-      --amber:   #fbbf24;
-      --amber-l: rgba(251,191,36,.15);
-      --red:     #f87171;
-      --red-d:   #ef4444;
-      --red-l:   rgba(248,113,113,.12);
-      --blue:    #60a5fa;
-      --blue-d:  #3b82f6;
-      --blue-l:  rgba(96,165,250,.12);
-      --text:    #fafafa;
-      --muted:   #a1a1aa;
-      --dim:     #71717a;
-      --border:  rgba(255,255,255,.08);
-      --fh:'Syne',sans-serif;
-      --fb:'Plus Jakarta Sans',sans-serif;
-      --r:10px;--rlg:16px;
-      --sh: 0 1px 3px rgba(0,0,0,.4);
-      --shlg: 0 20px 60px rgba(0,0,0,.6);
-      --glow: 0 0 40px rgba(34,197,94,.2);
+      --green:#1a6b3a;--green-d:#135029;--green-m:#2d8a52;--green-l:#e8f5ee;--green-ll:#f3faf6;
+      --amber:#f59e0b;--amber-l:#fef3c7;--red:#dc2626;--red-l:#fee2e2;
+      --blue:#1d4ed8;--blue-l:#dbeafe;
+      --g50:#f9fafb;--g100:#f3f4f6;--g200:#e5e7eb;--g400:#9ca3af;--g600:#4b5563;--g900:#111827;
+      --white:#fff;--fh:'Barlow Condensed',sans-serif;--fb:'DM Sans',sans-serif;
+      --r:10px;--rlg:16px;--sh:0 2px 8px rgba(0,0,0,.08);--shlg:0 12px 32px rgba(0,0,0,.14);
     }
-    html{scroll-behavior:smooth}
-    body{font-family:var(--fb);background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased}
+    body{font-family:var(--fb);background:var(--green-ll);color:var(--g900);min-height:100vh;-webkit-font-smoothing:antialiased}
     button,input,select{font-family:var(--fb)}
     button{cursor:pointer}
-    input::placeholder{color:var(--dim)}
 
-    /* ── SCROLLBAR ── */
-    ::-webkit-scrollbar{width:6px;height:6px}
-    ::-webkit-scrollbar-track{background:var(--s1)}
-    ::-webkit-scrollbar-thumb{background:var(--s3);border-radius:3px}
-
-    /* ── ANIMATIONS ── */
-    @keyframes slideUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
-    @keyframes fadeIn{from{opacity:0}to{opacity:1}}
-    @keyframes glow{0%,100%{box-shadow:0 0 20px rgba(34,197,94,.3)}50%{box-shadow:0 0 40px rgba(34,197,94,.5)}}
-    @keyframes spin{to{transform:rotate(360deg)}}
-    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
-
-    /* ══════════════════════════════════════ AUTH */
-    #auth-screen{
-      min-height:100vh;display:none;align-items:center;justify-content:center;padding:1.5rem;
-      background:radial-gradient(ellipse 80% 60% at 50% -10%,rgba(34,197,94,.15) 0%,transparent 60%),var(--bg);
-      position:relative;overflow:hidden}
-    #auth-screen::before{
-      content:'';position:absolute;inset:0;
-      background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none'%3E%3Ccircle cx='30' cy='30' r='1' fill='%2322c55e' fill-opacity='.07'/%3E%3C/g%3E%3C/svg%3E") repeat;
-      pointer-events:none}
-
-    .auth-card{
-      background:var(--s1);border:1px solid var(--border);
-      border-radius:24px;padding:2.75rem 2.5rem;width:100%;max-width:420px;
+    /* AUTH */
+    #auth-screen{min-height:100vh;display:none;align-items:center;justify-content:center;padding:1.5rem;
+      background:linear-gradient(145deg,#0d3d1f 0%,#1a6b3a 50%,#2d9955 100%);position:relative;overflow:hidden}
+    #auth-screen::before{content:'';position:absolute;inset:0;opacity:.04;
+      background:repeating-linear-gradient(45deg,#fff 0,#fff 1px,transparent 0,transparent 50%);background-size:20px 20px}
+    .auth-card{background:var(--white);border-radius:20px;padding:2.5rem;width:100%;max-width:440px;
       box-shadow:var(--shlg);position:relative;z-index:1;animation:slideUp .4s ease}
-
-    .auth-logo{text-align:center;margin-bottom:2rem}
-    .auth-logo .icon{
-      width:72px;height:72px;border-radius:20px;
-      background:linear-gradient(135deg,#16a34a,#22c55e);
-      display:inline-flex;align-items:center;justify-content:center;
-      font-size:2.2rem;margin-bottom:1rem;
-      box-shadow:0 0 32px rgba(34,197,94,.4),0 4px 16px rgba(0,0,0,.4);
-      animation:glow 3s ease-in-out infinite}
-    .auth-logo h1{font-family:var(--fh);font-size:1.8rem;font-weight:800;color:var(--text);line-height:1.1;letter-spacing:-.5px}
-    .auth-logo p{color:var(--dim);font-size:.8rem;margin-top:.4rem;text-transform:uppercase;letter-spacing:1px}
-
-    .auth-tabs{display:flex;background:var(--bg);border-radius:var(--r);padding:4px;margin-bottom:1.75rem;gap:4px;border:1px solid var(--border)}
-    .auth-tab{flex:1;padding:.55rem;border:none;background:transparent;border-radius:8px;font-size:.875rem;font-weight:600;color:var(--dim);transition:all .2s;cursor:pointer}
-    .auth-tab.active{background:var(--s2);color:var(--green);box-shadow:var(--sh)}
-
+    @keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+    .auth-logo{text-align:center;margin-bottom:1.75rem}
+    .auth-logo .icon{width:68px;height:68px;background:var(--green);border-radius:18px;display:inline-flex;
+      align-items:center;justify-content:center;font-size:2.2rem;margin-bottom:.75rem;box-shadow:0 4px 16px rgba(26,107,58,.35)}
+    .auth-logo h1{font-family:var(--fh);font-size:1.6rem;font-weight:800;color:var(--g900);line-height:1.1;letter-spacing:.5px}
+    .auth-logo p{color:var(--g400);font-size:.8rem;margin-top:.3rem;text-transform:uppercase;letter-spacing:.5px}
+    .auth-tabs{display:flex;background:var(--g100);border-radius:var(--r);padding:4px;margin-bottom:1.5rem;gap:4px}
+    .auth-tab{flex:1;padding:.5rem;border:none;background:transparent;border-radius:8px;font-size:.875rem;
+      font-weight:600;color:var(--g400);transition:all .2s}
+    .auth-tab.active{background:var(--white);color:var(--green);box-shadow:var(--sh)}
     .form-pane{display:none}.form-pane.active{display:block;animation:fadeIn .2s}
-
-    .form-group{margin-bottom:1rem}
-    .form-group label{display:block;font-size:.72rem;font-weight:700;color:var(--muted);margin-bottom:.4rem;text-transform:uppercase;letter-spacing:.8px}
-    .form-group input{
-      width:100%;padding:.7rem 1rem;
-      background:var(--bg);border:1.5px solid var(--s3);
-      border-radius:var(--r);font-size:.95rem;color:var(--text);outline:none;
-      transition:border-color .2s,box-shadow .2s}
-    .form-group input:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(34,197,94,.15)}
-    .form-row{display:grid;grid-template-columns:1fr 110px;gap:.75rem}
-
-    .btn-auth{
-      width:100%;padding:.85rem;margin-top:.5rem;
-      background:linear-gradient(135deg,var(--green-d),var(--green));
-      color:#fff;border:none;border-radius:var(--r);
-      font-size:.95rem;font-weight:700;font-family:var(--fh);letter-spacing:.3px;
-      transition:all .2s;box-shadow:0 4px 16px rgba(34,197,94,.3)}
-    .btn-auth:hover{transform:translateY(-1px);box-shadow:0 6px 24px rgba(34,197,94,.4)}
-    .btn-auth:active{transform:translateY(0)}
-
-    .auth-error{background:var(--red-l);color:var(--red);border:1px solid rgba(248,113,113,.3);border-radius:var(--r);padding:.625rem .875rem;font-size:.875rem;margin-bottom:1rem;display:none}
+    .form-group{margin-bottom:.875rem}
+    .form-group label{display:block;font-size:.75rem;font-weight:600;color:var(--g600);margin-bottom:.35rem;
+      text-transform:uppercase;letter-spacing:.5px}
+    .form-group input{width:100%;padding:.65rem 1rem;border:2px solid var(--g200);border-radius:var(--r);
+      font-size:.95rem;outline:none;transition:border-color .2s,box-shadow .2s;color:var(--g900)}
+    .form-group input:focus{border-color:var(--green);box-shadow:0 0 0 4px rgba(26,107,58,.1)}
+    .form-row{display:grid;grid-template-columns:1fr auto;gap:.75rem}
+    .form-row .form-group:last-child input{width:100px}
+    .field-hint{font-size:.75rem;color:var(--g400);margin-top:.3rem;line-height:1.4}
+    .field-hint strong{color:var(--g600)}
+    .field-hint.warning{background:#fef9c3;color:#854d0e;border-radius:6px;padding:.35rem .6rem;border-left:3px solid #eab308}
+    .btn-auth{width:100%;padding:.8rem;background:var(--green);color:white;border:none;border-radius:var(--r);
+      font-size:1rem;font-weight:700;font-family:var(--fh);letter-spacing:.5px;transition:background .2s,transform .1s;margin-top:.5rem}
+    .btn-auth:hover{background:var(--green-d)}.btn-auth:active{transform:scale(.98)}
+    .auth-error{background:var(--red-l);color:var(--red);border-radius:var(--r);padding:.625rem .875rem;
+      font-size:.875rem;margin-bottom:1rem;display:none}
     .auth-error.show{display:block;animation:fadeIn .2s}
-    .auth-success{background:var(--green-l);color:var(--green);border:1px solid rgba(34,197,94,.3);border-radius:var(--r);padding:.875rem 1rem;font-size:.875rem;margin-bottom:1rem;display:none;line-height:1.5}
+    .auth-success{background:var(--green-l);color:var(--green-d);border-radius:var(--r);padding:.875rem 1rem;
+      font-size:.9rem;margin-bottom:1rem;display:none;line-height:1.5}
     .auth-success.show{display:block;animation:fadeIn .2s}
-    .field-hint{font-size:.72rem;color:var(--dim);margin-top:.3rem;line-height:1.4}
-    .field-hint strong{color:var(--muted)}
-    .field-hint.warning{background:rgba(251,191,36,.1);color:#fbbf24;border-radius:6px;padding:.35rem .6rem;border-left:3px solid #fbbf24}
 
-    /* ══════════════════════════════════════ PENDING */
-    #pending-screen{display:none;min-height:100vh;align-items:center;justify-content:center;padding:1.5rem;background:var(--bg)}
+    /* PENDING SCREEN */
+    #pending-screen{display:none;min-height:100vh;align-items:center;justify-content:center;padding:1.5rem;
+      background:linear-gradient(145deg,#0d3d1f 0%,#1a6b3a 50%,#2d9955 100%)}
     #pending-screen.show{display:flex}
-    .pending-card{background:var(--s1);border:1px solid var(--border);border-radius:24px;padding:2.5rem;max-width:400px;width:100%;text-align:center;box-shadow:var(--shlg)}
-    .pending-icon{font-size:3rem;margin-bottom:1rem}
-    .pending-card h2{font-family:var(--fh);font-size:1.75rem;font-weight:800;color:var(--text);margin-bottom:.5rem}
-    .pending-card p{color:var(--muted);font-size:.9rem;line-height:1.6;margin-bottom:1.25rem}
-    .btn-back{padding:.65rem 1.5rem;border:1.5px solid var(--s3);border-radius:var(--r);background:transparent;font-weight:600;color:var(--muted);transition:all .2s}
-    .btn-back:hover{border-color:var(--green);color:var(--green)}
-
-    /* ══════════════════════════════════════ CHANGE PASSWORD */
     #chpass-screen{display:none;min-height:100vh;align-items:center;justify-content:center;padding:1.5rem;
-      background:radial-gradient(ellipse 80% 60% at 50% -10%,rgba(96,165,250,.1) 0%,transparent 60%),var(--bg)}
+      background:linear-gradient(145deg,#1e1b4b 0%,#312e81 50%,#4338ca 100%)}
     #chpass-screen.show{display:flex}
-    .chpass-card{background:var(--s1);border:1px solid var(--border);border-radius:24px;padding:2.5rem;max-width:400px;width:100%;text-align:center;box-shadow:var(--shlg)}
-    .chpass-card .icon{width:64px;height:64px;background:var(--blue-l);border:1px solid rgba(96,165,250,.3);border-radius:18px;display:inline-flex;align-items:center;justify-content:center;font-size:2rem;margin-bottom:1rem}
-    .chpass-card h2{font-family:var(--fh);font-size:1.75rem;font-weight:800;color:var(--text);margin-bottom:.5rem}
-    .chpass-card p{color:var(--muted);font-size:.875rem;line-height:1.5;margin-bottom:1.5rem}
-    .chpass-err{background:var(--red-l);color:var(--red);border:1px solid rgba(248,113,113,.3);border-radius:var(--r);padding:.625rem .875rem;font-size:.875rem;margin-bottom:1rem;display:none;text-align:left}
+    .chpass-card{background:var(--white);border-radius:20px;padding:2.5rem;max-width:400px;width:100%;
+      text-align:center;box-shadow:var(--shlg)}
+    .chpass-card .icon{width:64px;height:64px;background:#ede9fe;border-radius:18px;display:inline-flex;
+      align-items:center;justify-content:center;font-size:2rem;margin-bottom:1rem}
+    .chpass-card h2{font-family:var(--fh);font-size:1.75rem;font-weight:800;color:var(--g900);margin-bottom:.5rem}
+    .chpass-card p{color:var(--g600);font-size:.9rem;line-height:1.5;margin-bottom:1.5rem}
+    .chpass-err{background:var(--red-l);color:var(--red);border-radius:var(--r);padding:.625rem .875rem;
+      font-size:.875rem;margin-bottom:1rem;display:none;text-align:left}
     .chpass-err.show{display:block}
-
-    /* ══════════════════════════════════════ RESET SCREEN */
+    /* Reset link modal */
+    .reset-link-box{background:#0f172a;border-radius:var(--r);padding:.875rem 1rem;margin:1rem 0;
+      text-align:left;word-break:break-all}
+    .reset-link-value{font-size:.75rem;color:#7dd3fc;font-family:monospace;line-height:1.5;display:block}
+    .reset-link-note{font-size:.75rem;color:rgba(255,255,255,.55);display:block;margin-top:.375rem}
+    .btn-copy{margin-top:.75rem;padding:.5rem 1.25rem;border:none;border-radius:8px;
+      background:#7dd3fc;color:#0f172a;font-weight:700;font-size:.85rem;cursor:pointer;transition:all .2s}
+    .btn-copy:hover{background:#38bdf8}
+    .btn-reset-link{padding:.4rem .875rem;border:none;border-radius:8px;font-size:.78rem;font-weight:600;
+      background:#ede9fe;color:#4338ca;transition:all .2s;white-space:nowrap}
+    .btn-reset-link:hover{background:#4338ca;color:white}
+    /* Reset password screen */
     #reset-screen{display:none;min-height:100vh;align-items:center;justify-content:center;padding:1.5rem;
-      background:radial-gradient(ellipse 80% 60% at 50% -10%,rgba(96,165,250,.1) 0%,transparent 60%),var(--bg)}
+      background:linear-gradient(145deg,#0f172a 0%,#1e3a5f 50%,#1d4ed8 100%)}
     #reset-screen.show{display:flex}
-    .reset-card{background:var(--s1);border:1px solid var(--border);border-radius:24px;padding:2.5rem;max-width:400px;width:100%;text-align:center;box-shadow:var(--shlg)}
-    .reset-card .icon{width:64px;height:64px;background:var(--blue-l);border:1px solid rgba(96,165,250,.3);border-radius:18px;display:inline-flex;align-items:center;justify-content:center;font-size:2rem;margin-bottom:1rem}
-    .reset-err{background:var(--red-l);color:var(--red);border:1px solid rgba(248,113,113,.3);border-radius:var(--r);padding:.625rem .875rem;font-size:.875rem;margin-bottom:1rem;display:none;text-align:left}
+    .reset-card{background:var(--white);border-radius:20px;padding:2.5rem;max-width:400px;width:100%;
+      text-align:center;box-shadow:var(--shlg)}
+    .reset-card .icon{width:64px;height:64px;background:#dbeafe;border-radius:18px;display:inline-flex;
+      align-items:center;justify-content:center;font-size:2rem;margin-bottom:1rem}
+    .reset-err{background:var(--red-l);color:var(--red);border-radius:var(--r);padding:.625rem .875rem;
+      font-size:.875rem;margin-bottom:1rem;display:none;text-align:left}
     .reset-err.show{display:block}
-    .reset-ok{background:var(--green-l);color:var(--green);border:1px solid rgba(34,197,94,.3);border-radius:var(--r);padding:.875rem 1rem;font-size:.875rem;margin-bottom:1rem;display:none;text-align:left;line-height:1.5}
+    .reset-ok{background:var(--green-l);color:var(--green-d);border-radius:var(--r);padding:.875rem 1rem;
+      font-size:.9rem;margin-bottom:1rem;display:none;text-align:left;line-height:1.5}
     .reset-ok.show{display:block}
+    .pending-card{background:var(--white);border-radius:20px;padding:2.5rem;max-width:400px;width:100%;
+      text-align:center;box-shadow:var(--shlg)}
+    .pending-icon{font-size:3rem;margin-bottom:1rem}
+    .pending-card h2{font-family:var(--fh);font-size:1.75rem;font-weight:800;color:var(--g900);margin-bottom:.5rem}
+    .pending-card p{color:var(--g600);font-size:.95rem;line-height:1.6;margin-bottom:1.5rem}
+    .btn-back{padding:.65rem 1.5rem;border:2px solid var(--g200);border-radius:var(--r);background:white;
+      font-weight:600;color:var(--g600);transition:all .2s}
+    .btn-back:hover{border-color:var(--g400)}
 
-    /* ══════════════════════════════════════ APP */
+    /* APP */
     #app-screen{display:none;flex-direction:column;min-height:100vh}
     #app-screen.show{display:flex}
 
-    /* ── HEADER ── */
-    header{
-      background:var(--s1);border-bottom:1px solid var(--border);
-      position:sticky;top:0;z-index:100;
-      box-shadow:0 4px 24px rgba(0,0,0,.4)}
-    /* Green top accent line */
-    header::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--green),transparent)}
-
-    .header-inner{max-width:1000px;margin:0 auto;padding:.875rem 1.5rem;display:flex;align-items:center;gap:1rem}
-    .header-brand{flex:1;display:flex;align-items:center;gap:.875rem}
-    .header-brand .brand-icon{
-      width:36px;height:36px;border-radius:10px;
-      background:linear-gradient(135deg,var(--green-d),var(--green));
-      display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;
-      box-shadow:0 0 12px rgba(34,197,94,.3)}
-    .header-brand h2{font-family:var(--fh);font-size:1.1rem;font-weight:800;color:var(--text);letter-spacing:-.3px;line-height:1.1}
-    .header-brand small{color:var(--dim);font-size:.7rem;font-weight:400;display:block;letter-spacing:.5px;text-transform:uppercase}
+    /* HEADER */
+    header{background:var(--green);position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.2)}
+    .header-inner{max-width:980px;margin:0 auto;padding:.875rem 1.5rem;display:flex;align-items:center;gap:1rem}
+    .header-brand{flex:1}
+    .header-brand h2{font-family:var(--fh);font-size:1.35rem;font-weight:800;color:var(--white);letter-spacing:.5px;
+      line-height:1.1;text-transform:uppercase}
+    .header-brand small{color:rgba(255,255,255,.6);font-size:.75rem;font-weight:400}
     .header-actions{display:flex;align-items:center;gap:.5rem}
+    .user-pill{display:flex;align-items:center;gap:.5rem;background:rgba(255,255,255,.15);border-radius:100px;padding:.35rem .875rem .35rem .45rem}
+    .user-avatar{width:28px;height:28px;background:var(--amber);border-radius:50%;display:flex;align-items:center;
+      justify-content:center;font-size:.75rem;font-weight:700;color:var(--g900);flex-shrink:0}
+    .user-pill span{font-size:.82rem;font-weight:600;color:var(--white);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .btn-hdr{padding:.4rem .875rem;border-radius:8px;border:none;font-size:.78rem;font-weight:600;transition:all .2s}
+    .btn-admin{background:var(--amber);color:var(--g900)}.btn-admin:hover{background:#e5920a}
+    .btn-logout{background:rgba(255,255,255,.15);color:var(--white)}.btn-logout:hover{background:rgba(255,255,255,.25)}
 
-    .user-pill{display:flex;align-items:center;gap:.5rem;background:var(--s2);border:1px solid var(--border);border-radius:100px;padding:.35rem .875rem .35rem .45rem}
-    .user-avatar{width:28px;height:28px;background:linear-gradient(135deg,var(--amber),#f97316);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:800;color:var(--bg);flex-shrink:0}
-    .user-pill span{font-size:.8rem;font-weight:600;color:var(--text);max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-    .btn-hdr{padding:.4rem .875rem;border-radius:8px;border:none;font-size:.78rem;font-weight:600;transition:all .2s;cursor:pointer}
-    .btn-admin{background:rgba(251,191,36,.15);color:var(--amber);border:1px solid rgba(251,191,36,.3)}
-    .btn-admin:hover{background:rgba(251,191,36,.25)}
-    .btn-logout{background:var(--s2);color:var(--muted);border:1px solid var(--border)}
-    .btn-logout:hover{color:var(--text);border-color:var(--s3)}
+    /* MAIN */
+    .main{max-width:980px;margin:0 auto;padding:1.75rem 1.5rem;width:100%;flex:1}
+    .section-title{font-family:var(--fh);font-size:1.1rem;font-weight:700;letter-spacing:.5px;color:var(--g600);
+      text-transform:uppercase;margin-bottom:.875rem}
 
-    /* ── MAIN ── */
-    .main{max-width:1000px;margin:0 auto;padding:2rem 1.5rem;width:100%;flex:1}
-
-    /* ── DATE TABS ── */
-    .section-label{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--dim);margin-bottom:.875rem}
-    .date-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:.75rem;margin-bottom:1.5rem}
-    .date-tab{
-      padding:1rem;background:var(--s1);border:1.5px solid var(--border);
-      border-radius:var(--rlg);cursor:pointer;text-align:center;transition:all .2s;
-      position:relative;overflow:hidden}
-    .date-tab::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,var(--green),transparent);opacity:0;transition:opacity .2s}
-    .date-tab:hover{border-color:var(--s3);transform:translateY(-2px)}
-    .date-tab.active{border-color:var(--green);background:var(--green-ll)}
-    .date-tab.active::before{opacity:.03}
-    .tab-label{display:block;font-family:var(--fh);font-size:.95rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;position:relative}
+    /* DATE TABS */
+    .date-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:.625rem;margin-bottom:1.25rem}
+    .date-tab{padding:.875rem 1rem;background:var(--white);border:2.5px solid var(--g200);border-radius:var(--rlg);
+      cursor:pointer;text-align:center;transition:all .2s;box-shadow:var(--sh)}
+    .date-tab:hover{border-color:var(--green-m);transform:translateY(-1px)}
+    .date-tab.active{border-color:var(--green);background:var(--green-l)}
+    .tab-label{display:block;font-family:var(--fh);font-size:1rem;font-weight:700;letter-spacing:.5px;color:var(--g600);text-transform:uppercase}
     .date-tab.active .tab-label{color:var(--green)}
-    .tab-date{display:block;font-size:.8rem;color:var(--dim);margin-top:.3rem;position:relative}
-    .date-tab.active .tab-date{color:rgba(34,197,94,.7)}
+    .tab-date{display:block;font-size:.78rem;color:var(--g400);margin-top:.2rem}
+    .date-tab.active .tab-date{color:var(--green-m)}
 
-    /* ── LEGEND ── */
-    .legend{display:flex;gap:1.25rem;margin-bottom:1.25rem;flex-wrap:wrap;padding:.75rem 1rem;background:var(--s1);border-radius:var(--r);border:1px solid var(--border)}
-    .legend-item{display:flex;align-items:center;gap:.4rem;font-size:.75rem;color:var(--muted)}
-    .legend-dot{width:10px;height:10px;border-radius:3px}
+    /* LEGEND */
+    .legend{display:flex;gap:1.25rem;margin-bottom:1.1rem;flex-wrap:wrap}
+    .legend-item{display:flex;align-items:center;gap:.375rem;font-size:.78rem;color:var(--g600)}
+    .legend-dot{width:12px;height:12px;border-radius:3px}
 
-    /* ── GRID CARD ── */
-    .grid-card{background:var(--s1);border:1px solid var(--border);border-radius:var(--rlg);overflow:hidden;box-shadow:var(--sh)}
+    /* GRID */
+    .grid-card{background:var(--white);border-radius:var(--rlg);box-shadow:var(--sh);overflow:hidden}
     .grid-table{width:100%;border-collapse:collapse}
-    .grid-table thead th{
-      background:linear-gradient(135deg,var(--s2),var(--s1));
-      color:var(--muted);padding:1rem 1.25rem;
-      font-size:.72rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;text-align:center;
-      border-bottom:1px solid var(--border)}
-    .grid-table thead th:first-child{text-align:left;width:120px}
-    .grid-table thead th .court-icon{font-size:1rem;display:block;margin-bottom:.2rem}
-    .grid-table thead th .court-name{color:var(--text)}
-    .grid-table tbody tr{border-bottom:1px solid var(--border);transition:background .15s}
+    .grid-table thead th{background:var(--green);color:var(--white);padding:1rem 1.25rem;font-family:var(--fh);
+      font-size:1.1rem;font-weight:700;letter-spacing:.5px;text-align:center}
+    .grid-table thead th:first-child{text-align:left;width:105px}
+    .grid-table tbody tr{border-bottom:1px solid var(--g100)}
     .grid-table tbody tr:last-child{border-bottom:none}
-    .grid-table tbody tr:hover{background:rgba(255,255,255,.02)}
-    .grid-table td{padding:.75rem 1.25rem;text-align:center;vertical-align:middle}
-
+    .grid-table tbody tr:hover{background:rgba(0,0,0,.012)}
+    .grid-table td{padding:.7rem 1.25rem;text-align:center;vertical-align:middle}
     .time-cell{text-align:left;white-space:nowrap}
+    .time-main{font-family:var(--fh);font-size:1.1rem;font-weight:700;color:var(--g900);display:block;line-height:1}
+    .time-end{font-size:.72rem;color:var(--g400);display:block;margin-top:.15rem}
+    .loading-row td{text-align:center;padding:3rem;color:var(--g400)}
+    .spinner{display:inline-block;width:28px;height:28px;border:3px solid var(--green-l);border-top-color:var(--green);
+      border-radius:50%;animation:spin .7s linear infinite;margin-bottom:.5rem}
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    /* SLOT BUTTONS */
+    .slot-btn{display:inline-flex;align-items:center;justify-content:center;gap:.3rem;padding:.5rem 1rem;
+      border-radius:8px;font-size:.82rem;font-weight:600;border:none;transition:all .18s;min-width:140px;line-height:1.2;text-align:center}
+    .slot-available{background:var(--green-l);color:var(--green);cursor:pointer}
+    .slot-available:hover{background:var(--green);color:var(--white);transform:scale(1.03);box-shadow:0 3px 10px rgba(26,107,58,.3)}
+    .slot-mine{background:var(--blue-l);color:var(--blue);cursor:pointer;flex-direction:column}
+    .slot-mine:hover{background:#bfdbfe}
+    .slot-mine-sub{font-size:.68rem;font-weight:400;opacity:.85}
+    .slot-taken{background:var(--g100);color:var(--g600);cursor:pointer;flex-direction:column;max-width:160px}
+    .slot-taken:hover{background:var(--g200)}
+    .slot-taken-addr{font-size:.72rem;font-weight:400;color:var(--g400);max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .slot-past{background:var(--g50);color:#d1d5db;cursor:default}
+    /* Light indicator */
+    .light-badge{display:inline-flex;align-items:center;gap:.25rem;font-size:.68rem;font-weight:700;
+      padding:.15rem .45rem;border-radius:100px;margin-top:.2rem;white-space:nowrap}
+    .light-needed{background:linear-gradient(135deg,#1e1b4b,#312e81);color:#c7d2fe}
+    .light-dusk{background:linear-gradient(135deg,#7c2d12,#c2410c);color:#fed7aa}
     .time-cell-inner{display:flex;flex-direction:column;gap:.15rem}
-    .time-main{font-family:var(--fh);font-size:1.15rem;font-weight:700;color:var(--text);display:block;line-height:1}
-    .time-end{font-size:.7rem;color:var(--dim);display:block}
-
-    /* Loading */
-    .loading-row td{text-align:center;padding:3rem;color:var(--dim)}
-    .spinner{display:inline-block;width:28px;height:28px;border:2px solid var(--s3);border-top-color:var(--green);border-radius:50%;animation:spin .7s linear infinite;margin-bottom:.5rem}
-
-    /* ── SLOT BUTTONS ── */
-    .slot-btn{
-      display:inline-flex;align-items:center;justify-content:center;gap:.3rem;
-      padding:.55rem 1.1rem;border-radius:100px;font-size:.82rem;font-weight:600;
-      border:none;transition:all .2s;min-width:130px;line-height:1.2;text-align:center}
-
-    .slot-available{background:var(--green-l);color:var(--green);border:1px solid rgba(34,197,94,.2);cursor:pointer}
-    .slot-available:hover{background:var(--green);color:var(--bg);transform:scale(1.04);box-shadow:0 0 16px rgba(34,197,94,.3)}
-
-    .slot-mine{background:var(--blue-l);color:var(--blue);border:1px solid rgba(96,165,250,.2);cursor:pointer;flex-direction:column}
-    .slot-mine:hover{background:rgba(96,165,250,.2)}
-    .slot-mine-sub{font-size:.68rem;font-weight:400;opacity:.8}
-
-    .slot-taken{background:rgba(255,255,255,.04);color:var(--dim);border:1px solid var(--border);cursor:pointer;flex-direction:column}
-    .slot-taken:hover{background:rgba(255,255,255,.07)}
-    .slot-taken-addr{font-size:.7rem;font-weight:400;color:var(--s3);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-
-    .slot-past{background:transparent;color:var(--s3);cursor:default;border:1px dashed var(--s2)}
-    .slot-locked{background:var(--amber-l);color:var(--amber);cursor:default;font-size:.78rem;border:1px solid rgba(251,191,36,.2)}
-    .slot-break{background:rgba(251,191,36,.06);color:rgba(251,191,36,.7);cursor:default;font-size:.78rem;border:1px dashed rgba(251,191,36,.25);flex-direction:column;gap:.1rem}
-
-    /* Row tints */
-    tr.needs-light td{background:rgba(99,102,241,.02)}
-    tr.needs-light .time-cell{background:rgba(99,102,241,.05)!important}
-    tr.heavy-rain td{background:rgba(96,165,250,.03)!important}
-    tr.heavy-rain .time-cell{background:rgba(96,165,250,.07)!important}
-    tr.is-break td{background:rgba(251,191,36,.02)}
-    tr.is-break .time-cell{background:rgba(251,191,36,.05)!important}
-
-    /* Light badges */
-    .light-badge{display:inline-flex;align-items:center;gap:.25rem;font-size:.65rem;font-weight:700;padding:.15rem .45rem;border-radius:100px;margin-top:.2rem;white-space:nowrap}
-    .light-needed{background:rgba(99,102,241,.2);color:#a5b4fc;border:1px solid rgba(99,102,241,.3)}
-    .light-dusk{background:rgba(249,115,22,.15);color:#fb923c;border:1px solid rgba(249,115,22,.3)}
-
-    /* Weather */
-    .weather-strip{display:inline-flex;align-items:center;gap:.3rem;margin-top:.15rem;background:rgba(255,255,255,.05);border-radius:6px;padding:.2rem .45rem;border:1px solid var(--border);width:fit-content}
-    .weather-emoji{font-size:.8rem;line-height:1}
-    .weather-temp{font-size:.75rem;font-weight:700;color:var(--text)}
-    .weather-rain{font-size:.7rem;color:var(--blue);font-weight:600}
+    /* Row tint for night slots */
+    tr.needs-light td{background:rgba(49,46,129,.03)}
+    tr.needs-light .time-cell{background:rgba(49,46,129,.07)!important}
+    /* Weather widget */
+    .weather-strip{display:flex;align-items:center;gap:.35rem;margin-top:.15rem;
+      background:rgba(255,255,255,.7);border-radius:6px;padding:.2rem .45rem;
+      border:1px solid var(--g200);width:fit-content}
+    .weather-emoji{font-size:.85rem;line-height:1}
+    .weather-temp{font-size:.78rem;font-weight:700;color:var(--g900)}
+    .weather-rain{font-size:.72rem;color:var(--blue);font-weight:600}
     .weather-rain.heavy{color:var(--red)}
+    .weather-loading{font-size:.68rem;color:var(--g400);font-style:italic}
+    /* Rain row tint */
+    tr.heavy-rain td{background:rgba(29,78,216,.04)!important}
+    tr.heavy-rain .time-cell{background:rgba(29,78,216,.08)!important}
+    .slot-locked{background:var(--amber-l);color:#92400e;cursor:default;font-size:.78rem}
+    .slot-break{background:linear-gradient(135deg,#fef3c7,#fde68a);color:#92400e;cursor:default;
+      font-size:.78rem;border:1.5px dashed #f59e0b;flex-direction:column;gap:.1rem}
+    tr.is-break td{background:rgba(245,158,11,.04)}
+    tr.is-break .time-cell{background:rgba(245,158,11,.08)!important}
 
-    /* ══════════════════════════════════════ MODALS */
-    .overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;padding:1.25rem;z-index:200;backdrop-filter:blur(4px)}
+    /* MODALS */
+    .overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;
+      padding:1.25rem;z-index:200;backdrop-filter:blur(2px)}
     .overlay.show{display:flex;animation:fadeIn .2s}
-    .modal{background:var(--s1);border:1px solid var(--border);border-radius:24px;padding:2rem;max-width:440px;width:100%;box-shadow:var(--shlg);animation:slideUp .25s ease;max-height:90vh;overflow-y:auto}
-    .modal-icon{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin-bottom:1rem}
-    .modal-icon.reserve{background:var(--green-l);border:1px solid rgba(34,197,94,.3)}
-    .modal-icon.cancel{background:var(--red-l);border:1px solid rgba(248,113,113,.3)}
-    .modal-icon.info{background:var(--blue-l);border:1px solid rgba(96,165,250,.3)}
-    .modal-icon.admin{background:var(--amber-l);border:1px solid rgba(251,191,36,.3)}
-    .modal-title{font-family:var(--fh);font-size:1.5rem;font-weight:800;margin-bottom:.35rem;color:var(--text);letter-spacing:-.3px}
-    .modal-sub{color:var(--dim);font-size:.875rem;margin-bottom:1.25rem}
-
-    .info-card{background:var(--s2);border:1px solid var(--border);border-radius:var(--r);padding:1rem 1.125rem;margin-bottom:1.5rem}
-    .info-card.danger{background:var(--red-l);border-color:rgba(248,113,113,.3)}
-    .info-card.blue{background:var(--blue-l);border-color:rgba(96,165,250,.3)}
-    .info-row{display:flex;justify-content:space-between;align-items:center;font-size:.875rem;padding:.3rem 0}
-    .info-row:not(:last-child){border-bottom:1px solid var(--border)}
-    .info-label{color:var(--dim)}
-    .info-value{font-weight:700;color:var(--text)}
-    .info-card.danger .info-value{color:var(--red)}
-    .info-card.blue .info-value{color:var(--blue)}
-
+    .modal{background:var(--white);border-radius:20px;padding:2rem;max-width:440px;width:100%;
+      box-shadow:var(--shlg);animation:slideUp .25s ease;max-height:90vh;overflow-y:auto}
+    .modal-icon{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;
+      font-size:1.5rem;margin-bottom:1rem}
+    .modal-icon.reserve{background:var(--green-l)}.modal-icon.cancel{background:var(--red-l)}
+    .modal-icon.info{background:var(--blue-l)}.modal-icon.admin{background:var(--amber-l)}
+    .modal-title{font-family:var(--fh);font-size:1.5rem;font-weight:800;margin-bottom:.35rem;letter-spacing:.3px}
+    .modal-sub{color:var(--g400);font-size:.875rem;margin-bottom:1.25rem}
+    .info-card{background:var(--green-l);border-radius:var(--r);padding:1rem 1.125rem;margin-bottom:1.5rem}
+    .info-card.danger{background:var(--red-l)}.info-card.blue{background:var(--blue-l)}
+    .info-row{display:flex;justify-content:space-between;align-items:center;font-size:.875rem;padding:.25rem 0}
+    .info-row:not(:last-child){border-bottom:1px solid rgba(0,0,0,.06)}
+    .info-label{color:var(--g600)}.info-value{font-weight:700;color:var(--green-d)}
+    .info-card.danger .info-value{color:var(--red)}.info-card.blue .info-value{color:var(--blue)}
     .modal-actions{display:flex;gap:.75rem}
-    .btn-mc{flex:1;padding:.7rem;border:1.5px solid var(--s3);border-radius:var(--r);background:transparent;font-weight:600;color:var(--muted);transition:all .2s;cursor:pointer}
-    .btn-mc:hover{border-color:var(--dim);color:var(--text)}
-    .btn-mok{flex:2;padding:.7rem;border:none;border-radius:var(--r);background:linear-gradient(135deg,var(--green-d),var(--green));color:var(--bg);font-weight:700;font-family:var(--fh);font-size:1rem;letter-spacing:.3px;transition:all .2s;cursor:pointer}
-    .btn-mok:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(34,197,94,.3)}
-    .btn-mdel{flex:2;padding:.7rem;border:none;border-radius:var(--r);background:var(--red-d);color:white;font-weight:700;font-family:var(--fh);font-size:1rem;letter-spacing:.3px;transition:all .2s;cursor:pointer}
-    .btn-mdel:hover{background:#dc2626}
+    .btn-mc{flex:1;padding:.7rem;border:2px solid var(--g200);border-radius:var(--r);background:var(--white);
+      font-weight:600;color:var(--g600);transition:all .2s}
+    .btn-mc:hover{border-color:var(--g400)}
+    .btn-mok{flex:2;padding:.7rem;border:none;border-radius:var(--r);background:var(--green);color:white;
+      font-weight:700;font-family:var(--fh);font-size:1rem;letter-spacing:.3px;transition:background .2s}
+    .btn-mok:hover{background:var(--green-d)}
+    .btn-mdel{flex:2;padding:.7rem;border:none;border-radius:var(--r);background:var(--red);color:white;
+      font-weight:700;font-family:var(--fh);font-size:1rem;letter-spacing:.3px;transition:background .2s}
+    .btn-mdel:hover{background:#b91c1c}
 
-    /* ══════════════════════════════════════ ADMIN MODAL */
+    /* ADMIN MODAL */
     .admin-modal{max-width:900px}
-    .admin-tabs{display:flex;gap:4px;background:var(--bg);border-radius:var(--r);padding:4px;margin-bottom:1.5rem;border:1px solid var(--border)}
-    .admin-tab{flex:1;padding:.5rem .75rem;border:none;background:transparent;border-radius:8px;font-size:.8rem;font-weight:600;color:var(--dim);transition:all .2s;cursor:pointer;white-space:nowrap}
-    .admin-tab.active{background:var(--s2);color:var(--green);box-shadow:var(--sh)}
+    .admin-tabs{display:flex;gap:4px;background:var(--g100);border-radius:var(--r);padding:4px;margin-bottom:1.5rem}
+    .admin-tab{flex:1;padding:.5rem .75rem;border:none;background:transparent;border-radius:8px;font-size:.82rem;
+      font-weight:600;color:var(--g400);transition:all .2s;white-space:nowrap}
+    .admin-tab.active{background:var(--white);color:var(--green);box-shadow:var(--sh)}
     .admin-pane{display:none}.admin-pane.active{display:block;animation:fadeIn .2s}
-
-    /* Season sections */
-    .season-section{margin-bottom:1rem;padding:1rem;border-radius:var(--r);border:1.5px solid var(--s3);background:var(--s2)}
-    .season-section.active-season{border-color:rgba(34,197,94,.4);background:var(--green-ll)}
-    .season-section.summer{border-color:rgba(251,191,36,.3);background:rgba(251,191,36,.05)}
-    .season-section.summer.active-season{border-color:rgba(251,191,36,.6);background:rgba(251,191,36,.08)}
-    .season-label{display:flex;align-items:center;gap:.5rem;font-family:var(--fh);font-size:1rem;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);margin-bottom:.75rem}
-    .season-badge{font-size:.7rem;background:var(--green);color:var(--bg);border-radius:100px;padding:.2rem .6rem;font-family:var(--fb);font-weight:700;text-transform:none;letter-spacing:0}
-    .season-badge.summer-badge{background:var(--amber);color:var(--bg)}
-
     .config-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.75rem}
-    .cfg-item label{display:block;font-size:.7rem;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.5px;margin-bottom:.375rem}
-    .cfg-item select,.cfg-item input[type=number]{
-      width:100%;padding:.55rem .75rem;
-      background:var(--bg);border:1.5px solid var(--s3);border-radius:var(--r);
-      font-size:.875rem;font-family:var(--fb);color:var(--text);outline:none;transition:border-color .2s}
+    .cfg-item label{display:block;font-size:.75rem;font-weight:600;color:var(--g600);
+      text-transform:uppercase;letter-spacing:.4px;margin-bottom:.35rem}
+    .cfg-item select,.cfg-item input[type=number]{width:100%;padding:.55rem .75rem;border:2px solid var(--g200);
+      border-radius:var(--r);font-size:.9rem;font-family:var(--fb);outline:none;transition:border-color .2s}
     .cfg-item select:focus,.cfg-item input:focus{border-color:var(--green)}
-    .cfg-item select option{background:var(--s1)}
-
-    .season-dates-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-top:.875rem;padding-top:.875rem;border-top:1px solid var(--border)}
-    .preview-box{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:.875rem 1rem;margin-top:.875rem}
-    .preview-box p{font-size:.75rem;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.5px;margin-bottom:.375rem}
+    .season-section{margin-bottom:1rem;padding:1rem;border-radius:var(--r);border:2px solid var(--g200)}
+    .season-section.active-season{border-color:var(--green);background:var(--green-ll)}
+    .season-section.summer{border-color:#f59e0b;background:#fffbeb}
+    .season-section.summer.active-season{border-color:#d97706;background:#fef3c7}
+    .season-label{display:flex;align-items:center;gap:.5rem;font-family:var(--fh);font-size:1rem;font-weight:700;
+      letter-spacing:.5px;text-transform:uppercase;color:var(--g600);margin-bottom:.75rem}
+    .season-badge{font-size:.7rem;background:var(--green);color:white;border-radius:100px;padding:.2rem .6rem;font-family:var(--fb);font-weight:700;text-transform:none;letter-spacing:0}
+    .season-badge.summer-badge{background:#d97706}
+    .season-dates-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-top:.875rem;
+      padding-top:.875rem;border-top:1px solid var(--g200)}
+    .preview-box{background:var(--green-l);border-radius:var(--r);padding:.875rem 1rem;margin-top:.875rem}
+    .preview-box p{font-size:.78rem;font-weight:600;color:var(--green-d);margin-bottom:.375rem}
     .preview-tags{display:flex;flex-wrap:wrap;gap:.375rem}
-    .prev-tag{background:var(--green-l);color:var(--green);border:1px solid rgba(34,197,94,.2);border-radius:6px;padding:.2rem .5rem;font-size:.72rem;font-weight:600}
-    .summer-tag{background:var(--amber-l)!important;color:var(--amber)!important;border-color:rgba(251,191,36,.3)!important}
-    .admin-err{color:var(--red);font-size:.875rem;margin-top:.5rem;min-height:1em}
+    .prev-tag{background:var(--green);color:white;border-radius:6px;padding:.2rem .5rem;font-size:.72rem;font-weight:600}
+    .summer-tag{background:#d97706!important}
+    .admin-err{color:var(--red);font-size:.875rem;margin-top:.5rem;min-height:1.2em}
 
-    /* Users */
-    .import-export-bar{display:flex;gap:.625rem;margin-bottom:1rem;flex-wrap:wrap}
-    .btn-export{padding:.5rem 1rem;border:1.5px solid rgba(34,197,94,.4);border-radius:8px;background:transparent;color:var(--green);font-size:.82rem;font-weight:600;cursor:pointer;transition:all .2s}
-    .btn-export:hover{background:var(--green-l)}
-    .btn-import{padding:.5rem 1rem;border:1.5px solid rgba(96,165,250,.4);border-radius:8px;background:transparent;color:var(--blue);font-size:.82rem;font-weight:600;cursor:pointer;transition:all .2s}
-    .btn-import:hover{background:var(--blue-l)}
-    .import-result{background:var(--s2);border-radius:var(--r);padding:.75rem 1rem;font-size:.82rem;margin-top:.75rem;border:1px solid var(--border);display:none}
-    .import-result.show{display:block}
-    .import-result p{margin-bottom:.25rem;color:var(--muted)}
-    .import-err-list{color:var(--red);font-size:.75rem;margin-top:.375rem;max-height:80px;overflow-y:auto}
-
-    .user-search{width:100%;padding:.65rem 1rem;background:var(--bg);border:1.5px solid var(--s3);border-radius:var(--r);font-size:.875rem;color:var(--text);outline:none;margin-bottom:.75rem;transition:border-color .2s}
+    /* USER LIST */
+    .user-search{width:100%;padding:.6rem 1rem;border:2px solid var(--g200);border-radius:var(--r);
+      font-size:.9rem;outline:none;margin-bottom:.75rem;transition:border-color .2s}
     .user-search:focus{border-color:var(--green)}
-    .user-search::placeholder{color:var(--dim)}
-    .users-list{display:flex;flex-direction:column;gap:.4rem;max-height:400px;overflow-y:auto}
-
-    .user-row{display:flex;align-items:center;gap:.75rem;padding:.75rem 1rem;background:var(--s2);border-radius:var(--r);border:1px solid var(--border);cursor:pointer;transition:all .2s}
-    .user-row:hover{border-color:var(--s3)}
-    .user-row.pending{border-color:rgba(251,191,36,.3);background:rgba(251,191,36,.05)}
-    .user-info{flex:1;min-width:0}
-    .user-info strong{display:block;font-size:.875rem;font-weight:600;color:var(--text)}
-    .user-info span{display:block;font-size:.75rem;color:var(--dim)}
-    .user-badge-status{font-size:.68rem;font-weight:700;padding:.2rem .5rem;border-radius:100px;white-space:nowrap}
-    .badge-pending{background:var(--amber-l);color:var(--amber);border:1px solid rgba(251,191,36,.3)}
-    .badge-ok{background:var(--green-l);color:var(--green);border:1px solid rgba(34,197,94,.3)}
-    .badge-denied{background:var(--red-l);color:var(--red);border:1px solid rgba(248,113,113,.3)}
-    .btn-approve{padding:.4rem .875rem;border:none;border-radius:8px;font-size:.75rem;font-weight:600;transition:all .2s;white-space:nowrap;cursor:pointer}
-    .btn-grant{background:var(--green-l);color:var(--green)}.btn-grant:hover{background:var(--green);color:var(--bg)}
-    .btn-deny{background:var(--red-l);color:var(--red)}.btn-deny:hover{background:var(--red-d);color:white}
-    .users-empty{text-align:center;color:var(--dim);padding:2rem;font-size:.875rem}
-
-    .user-edit-form{background:var(--bg);border-radius:var(--r);padding:.875rem;margin-top:.4rem;border:1px solid var(--border);display:none}
+    .users-list{display:flex;flex-direction:column;gap:.5rem;max-height:400px;overflow-y:auto}
+    .user-edit-form{background:var(--g50);border-radius:var(--r);padding:.875rem;margin-top:.5rem;
+      border:1.5px solid var(--g200);display:none}
     .user-edit-form.open{display:block;animation:fadeIn .2s}
     .edit-grid{display:grid;grid-template-columns:1fr 1fr;gap:.625rem;margin-bottom:.625rem}
-    .edit-field label{display:block;font-size:.7rem;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.4px;margin-bottom:.3rem}
-    .edit-field input{width:100%;padding:.5rem .75rem;background:var(--s1);border:1.5px solid var(--s3);border-radius:8px;font-size:.85rem;color:var(--text);outline:none;transition:border-color .2s}
+    .edit-field label{display:block;font-size:.72rem;font-weight:600;color:var(--g600);
+      text-transform:uppercase;letter-spacing:.4px;margin-bottom:.3rem}
+    .edit-field input{width:100%;padding:.5rem .75rem;border:2px solid var(--g200);border-radius:8px;
+      font-size:.85rem;outline:none;transition:border-color .2s}
     .edit-field input:focus{border-color:var(--green)}
-    .edit-field input:disabled{opacity:.4;cursor:not-allowed}
-    .edit-actions{display:flex;gap:.5rem;margin-top:.625rem;flex-wrap:wrap}
-    .btn-edit-save{flex:1;padding:.5rem;border:none;border-radius:8px;background:linear-gradient(135deg,var(--green-d),var(--green));color:var(--bg);font-size:.82rem;font-weight:700;font-family:var(--fh);letter-spacing:.3px;transition:all .2s;cursor:pointer}
-    .btn-edit-save:hover{transform:translateY(-1px)}
-    .btn-edit-cancel{padding:.5rem .875rem;border:1.5px solid var(--s3);border-radius:8px;background:transparent;font-size:.82rem;font-weight:600;color:var(--dim);transition:all .2s;cursor:pointer}
-    .btn-edit-cancel:hover{border-color:var(--dim);color:var(--text)}
-    .btn-edit-delete{padding:.5rem .875rem;border:none;border-radius:8px;background:var(--red-l);font-size:.82rem;font-weight:600;color:var(--red);transition:all .2s;margin-left:auto;cursor:pointer}
-    .btn-edit-delete:hover{background:var(--red-d);color:white}
-    .btn-reset-link{padding:.4rem .875rem;border:none;border-radius:8px;font-size:.78rem;font-weight:600;background:var(--blue-l);color:var(--blue);transition:all .2s;white-space:nowrap;cursor:pointer}
-    .btn-reset-link:hover{background:var(--blue-d);color:white}
+    .edit-actions{display:flex;gap:.5rem;margin-top:.625rem}
+    .btn-edit-save{flex:1;padding:.5rem;border:none;border-radius:8px;background:var(--green);color:white;
+      font-size:.82rem;font-weight:700;font-family:var(--fh);letter-spacing:.3px;transition:background .2s}
+    .btn-edit-save:hover{background:var(--green-d)}
+    .btn-edit-cancel{padding:.5rem .875rem;border:2px solid var(--g200);border-radius:8px;background:white;
+      font-size:.82rem;font-weight:600;color:var(--g600);transition:all .2s}
+    .btn-edit-cancel:hover{border-color:var(--g400)}
+    .btn-edit-delete{padding:.5rem .875rem;border:none;border-radius:8px;background:var(--red-l);
+      font-size:.82rem;font-weight:600;color:var(--red);transition:all .2s;margin-left:auto}
+    .btn-edit-delete:hover{background:var(--red);color:white}
     .edit-err{font-size:.78rem;color:var(--red);margin-top:.375rem;min-height:1em}
+    .user-row{display:flex;align-items:center;gap:.75rem;padding:.75rem 1rem;background:var(--g50);
+      border-radius:var(--r);border:1.5px solid var(--g200)}
+    .user-row.pending{border-color:#fcd34d;background:#fffbeb}
+    .user-row.denied{border-color:var(--g200);background:var(--g50);opacity:.7}
+    .user-info{flex:1;min-width:0}
+    .user-info strong{display:block;font-size:.875rem;font-weight:600;color:var(--g900)}
+    .user-info span{display:block;font-size:.75rem;color:var(--g400)}
+    .user-badge-status{font-size:.7rem;font-weight:700;padding:.2rem .5rem;border-radius:100px;white-space:nowrap}
+    .badge-pending{background:#fef3c7;color:#92400e}
+    .badge-ok{background:var(--green-l);color:var(--green-d)}
+    .badge-denied{background:var(--red-l);color:var(--red)}
+    .btn-approve{padding:.4rem .875rem;border:none;border-radius:8px;font-size:.78rem;font-weight:600;transition:all .2s;white-space:nowrap}
+    .btn-grant{background:var(--green-l);color:var(--green-d)}.btn-grant:hover{background:var(--green);color:white}
+    .btn-deny{background:var(--red-l);color:var(--red)}.btn-deny:hover{background:var(--red);color:white}
+    .users-empty{text-align:center;color:var(--g400);padding:2rem;font-size:.875rem}
 
-    /* History */
+    /* HISTORY */
     .history-filter{display:flex;gap:.5rem;margin-bottom:1rem;align-items:center}
-    .history-filter label{font-size:.78rem;font-weight:700;color:var(--dim);white-space:nowrap;text-transform:uppercase;letter-spacing:.5px}
-    .history-filter input[type=date]{padding:.4rem .75rem;background:var(--bg);border:1.5px solid var(--s3);border-radius:var(--r);font-size:.85rem;font-family:var(--fb);color:var(--text);outline:none}
+    .history-filter label{font-size:.8rem;font-weight:600;color:var(--g600);white-space:nowrap}
+    .history-filter input[type=date]{padding:.4rem .75rem;border:2px solid var(--g200);border-radius:var(--r);
+      font-size:.85rem;font-family:var(--fb);outline:none}
     .history-filter input:focus{border-color:var(--green)}
     .history-table{width:100%;border-collapse:collapse;font-size:.82rem;max-height:420px;display:block;overflow-y:auto}
-    .history-table thead,.history-table tbody{display:table;width:100%}
-    .history-table th{background:var(--bg);color:var(--dim);padding:.5rem .75rem;text-align:left;font-weight:700;font-size:.72rem;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap;border-bottom:1px solid var(--border)}
-    .history-table td{padding:.5rem .75rem;border-bottom:1px solid var(--border);color:var(--muted)}
+    .history-table thead{display:table;width:100%}
+    .history-table tbody{display:table;width:100%}
+    .history-table th{background:var(--g100);color:var(--g600);padding:.5rem .75rem;text-align:left;
+      font-weight:600;font-size:.75rem;text-transform:uppercase;letter-spacing:.3px;white-space:nowrap}
+    .history-table td{padding:.5rem .75rem;border-bottom:1px solid var(--g100);color:var(--g900)}
     .history-table tbody tr:last-child td{border-bottom:none}
-    .history-table tbody tr:hover td{background:rgba(255,255,255,.02);color:var(--text)}
-    .court-badge{display:inline-block;background:var(--green-l);color:var(--green);border-radius:6px;padding:.15rem .5rem;font-size:.72rem;font-weight:700}
-    .history-empty{text-align:center;color:var(--dim);padding:2rem;font-size:.875rem}
+    .history-table tbody tr:hover td{background:var(--g50)}
+    .court-badge{display:inline-block;background:var(--green-l);color:var(--green-d);border-radius:6px;
+      padding:.15rem .5rem;font-size:.72rem;font-weight:700}
+    .history-empty{text-align:center;color:var(--g400);padding:2rem;font-size:.875rem}
 
-    /* Reset link modal */
-    .reset-link-box{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:.875rem 1rem;margin:1rem 0;text-align:left;word-break:break-all}
-    .reset-link-value{font-size:.72rem;color:var(--blue);font-family:monospace;line-height:1.5;display:block}
-    .reset-link-note{font-size:.72rem;color:var(--dim);display:block;margin-top:.375rem}
-    .btn-copy{margin-top:.75rem;padding:.5rem 1.25rem;border:none;border-radius:8px;background:var(--blue-l);color:var(--blue);font-weight:700;font-size:.85rem;cursor:pointer;transition:all .2s}
-    .btn-copy:hover{background:var(--blue-d);color:white}
+    /* ADDRESS POPUP */
+    #addr-popup{position:fixed;z-index:300;background:var(--g900);color:white;border-radius:10px;
+      padding:.625rem 1rem;font-size:.82rem;font-weight:600;pointer-events:none;display:none;
+      box-shadow:0 4px 16px rgba(0,0,0,.3);max-width:220px;line-height:1.4}
+    #addr-popup::after{content:'';position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);
+      border:6px solid transparent;border-bottom:none;border-top-color:var(--g900)}
 
-    /* Account tab */
-    .account-section{margin-bottom:1.25rem;padding:1.25rem;background:var(--s2);border-radius:var(--r);border:1px solid var(--border)}
-    .account-section h4{font-family:var(--fh);font-size:1rem;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);margin-bottom:.875rem;padding-bottom:.5rem;border-bottom:1px solid var(--border)}
-    .account-err{color:var(--red);font-size:.82rem;margin-top:.5rem;min-height:1em}
-    .account-ok{color:var(--green);font-size:.82rem;margin-top:.5rem;font-weight:600}
-
-    /* ══════════════════════════════════════ TOAST */
-    #toast{position:fixed;bottom:1.75rem;left:50%;transform:translateX(-50%) translateY(80px);background:var(--s2);border:1px solid var(--border);color:var(--text);padding:.7rem 1.5rem;border-radius:100px;font-size:.875rem;font-weight:600;z-index:400;transition:transform .3s cubic-bezier(.34,1.56,.64,1);pointer-events:none;white-space:nowrap;box-shadow:var(--shlg)}
+    /* TOAST */
+    #toast{position:fixed;bottom:1.75rem;left:50%;transform:translateX(-50%) translateY(80px);
+      background:var(--g900);color:var(--white);padding:.7rem 1.5rem;border-radius:100px;font-size:.875rem;
+      font-weight:600;z-index:400;transition:transform .3s cubic-bezier(.34,1.56,.64,1);pointer-events:none;
+      white-space:nowrap;box-shadow:0 4px 16px rgba(0,0,0,.25)}
     #toast.show{transform:translateX(-50%) translateY(0)}
-    #toast.success{background:var(--green);color:var(--bg);border-color:var(--green)}
-    #toast.error{background:var(--red-d);color:white;border-color:var(--red-d)}
+    #toast.success{background:var(--green)}#toast.error{background:var(--red)}
 
-    /* ══════════════════════════════════════ RESPONSIVE */
     @media(max-width:640px){
-      .header-inner{padding:.75rem 1rem}
-      .user-pill span{max-width:70px}
-      .main{padding:1.25rem 1rem}
-      .date-tab{padding:.7rem .5rem}
-      .tab-label{font-size:.85rem}
-      .tab-date{font-size:.7rem}
-      .grid-table thead th,.grid-table td{padding:.625rem .75rem}
-      .slot-btn{min-width:110px;padding:.45rem .7rem;font-size:.78rem}
-      .config-grid{grid-template-columns:1fr 1fr}
-      .header-brand h2{font-size:.95rem}
-      .legend{gap:.875rem}
+      .header-inner{padding:.75rem 1rem}.user-pill span{max-width:70px}.main{padding:1.25rem 1rem}
+      .date-tab{padding:.7rem .5rem}.tab-label{font-size:.88rem}.tab-date{font-size:.7rem}
+      .grid-table thead th,.grid-table td{padding:.6rem .75rem}
+      .slot-btn{min-width:115px;padding:.45rem .7rem;font-size:.78rem}
+      .config-grid{grid-template-columns:1fr 1fr}.header-brand h2{font-size:1.1rem}
     }
   </style>
 </head>
@@ -445,74 +367,93 @@
     </div>
     <div id="auth-error" class="auth-error"></div>
     <div id="auth-ok" class="auth-success"></div>
+
+    <!-- Login -->
     <div id="pane-login" class="form-pane active">
       <div class="form-group"><label>Usuario</label>
-        <input id="l-user" type="text" placeholder="tu_usuario" autocomplete="username"/></div>
+        <input id="l-user" type="text" placeholder="tu_usuario" autocomplete="username"/>
+      </div>
       <div class="form-group"><label>Contraseña</label>
-        <input id="l-pass" type="password" placeholder="••••••••" autocomplete="current-password"/></div>
+        <input id="l-pass" type="password" placeholder="••••••••" autocomplete="current-password"/>
+      </div>
       <button class="btn-auth" onclick="doLogin()">Entrar →</button>
     </div>
+
+    <!-- Register -->
     <div id="pane-register" class="form-pane">
       <div class="form-group"><label>Nombre completo</label>
-        <input id="r-name" type="text" placeholder="Juan García López"/></div>
+        <input id="r-name" type="text" placeholder="Juan García López"/>
+      </div>
       <div class="form-group"><label>Usuario</label>
         <input id="r-user" type="text" placeholder="juangarcia" autocomplete="username"/>
-        <p class="field-hint">⚠️ <strong>Recuerda bien tu usuario</strong> — lo necesitarás para iniciar sesión. Se guarda en <strong>minúsculas</strong>.</p></div>
+        <p class="field-hint">⚠️ <strong>Recuerda bien tu usuario</strong> — lo necesitarás para iniciar sesión. Las letras se guardan en <strong>minúsculas</strong> automáticamente.</p>
+      </div>
       <div class="form-row">
         <div class="form-group"><label>Calle / Avenida</label>
-          <input id="r-calle" type="text" placeholder="Calle Mayor"/></div>
+          <input id="r-calle" type="text" placeholder="Calle Mayor"/>
+        </div>
         <div class="form-group"><label>Nº</label>
-          <input id="r-num" type="text" placeholder="12"/></div>
+          <input id="r-num" type="text" placeholder="12"/>
+        </div>
       </div>
       <div class="form-group"><label>Contraseña</label>
         <input id="r-pass" type="password" placeholder="Mínimo 4 caracteres" autocomplete="new-password"/>
-        <p class="field-hint warning">🔡 La contraseña <strong>distingue mayúsculas y minúsculas</strong>.</p></div>
+        <p class="field-hint warning">🔡 La contraseña <strong>distingue entre mayúsculas y minúsculas</strong>. Escríbela exactamente igual cada vez que entres.</p>
+      </div>
       <button class="btn-auth" onclick="doRegister()">Crear cuenta</button>
     </div>
   </div>
 </div>
 
-<!-- ═══ PENDIENTE ════════════════════════════════════════════════════════ -->
+<!-- ═══ PENDIENTE APROBACIÓN ══════════════════════════════════════════════ -->
 <div id="pending-screen">
   <div class="pending-card">
     <div class="pending-icon">⏳</div>
     <h2>Cuenta pendiente</h2>
-    <p>Tu registro ha sido recibido. El administrador revisará tu solicitud y te dará acceso pronto.</p>
-    <p style="font-size:.8rem;color:var(--dim);margin-bottom:1.5rem">Contacta con la administración del club si tienes dudas.</p>
+    <p>Tu registro ha sido recibido. El administrador del club revisará tu solicitud y te dará acceso pronto.</p>
+    <p style="font-size:.8rem;color:var(--g400);margin-bottom:1.5rem">Si tienes dudas, contacta con la administración del club.</p>
     <button class="btn-back" onclick="backToLogin()">← Volver al inicio</button>
   </div>
 </div>
 
-<!-- ═══ CAMBIO DE CONTRASEÑA OBLIGATORIO ════════════════════════════════ -->
+<!-- ═══ CAMBIO DE CONTRASEÑA OBLIGATORIO ════════════════════════════════════ -->
 <div id="chpass-screen">
   <div class="chpass-card">
     <div class="icon">🔑</div>
-    <h2 style="font-family:var(--fh);font-size:1.75rem;font-weight:800;color:var(--text);margin-bottom:.5rem">Nueva contraseña</h2>
-    <p>Has accedido con una contraseña temporal. Debes crear una nueva antes de continuar.</p>
+    <h2>Nueva contraseña</h2>
+    <p>Has accedido con una contraseña temporal. Debes crear una nueva contraseña antes de continuar.</p>
     <div id="chpass-err" class="chpass-err"></div>
-    <div class="form-group" style="text-align:left"><label>Nueva contraseña</label>
+    <div class="form-group" style="text-align:left">
+      <label>Nueva contraseña</label>
       <input id="chpass-new" type="password" placeholder="Mínimo 4 caracteres"/>
-      <p class="field-hint warning">🔡 Distingue entre mayúsculas y minúsculas</p></div>
-    <div class="form-group" style="text-align:left"><label>Repite la contraseña</label>
-      <input id="chpass-rep" type="password" placeholder="Repite la contraseña"/></div>
+      <p class="field-hint warning">🔡 La contraseña <strong>distingue entre mayúsculas y minúsculas</strong>. Escríbela exactamente igual cada vez que entres.</p>
+    </div>
+    <div class="form-group" style="text-align:left">
+      <label>Repite la contraseña</label>
+      <input id="chpass-rep" type="password" placeholder="Repite la contraseña"/>
+    </div>
     <button class="btn-auth" onclick="doChangePassword()">Guardar y entrar →</button>
   </div>
 </div>
 
-<!-- ═══ RESET DE CONTRASEÑA ══════════════════════════════════════════════ -->
+<!-- ═══ RESET DE CONTRASEÑA (desde enlace) ══════════════════════════════════ -->
 <div id="reset-screen">
   <div class="reset-card">
     <div class="icon">🔐</div>
-    <h2 style="font-family:var(--fh);font-size:1.75rem;font-weight:800;color:var(--text);margin-bottom:.5rem">Nueva contraseña</h2>
-    <p id="reset-welcome" style="color:var(--muted);font-size:.9rem;line-height:1.5;margin-bottom:1.25rem"></p>
+    <h2 style="font-family:var(--fh);font-size:1.75rem;font-weight:800;color:var(--g900);margin-bottom:.5rem">Nueva contraseña</h2>
+    <p id="reset-welcome" style="color:var(--g600);font-size:.9rem;line-height:1.5;margin-bottom:1.25rem"></p>
     <div id="reset-err" class="reset-err"></div>
     <div id="reset-ok" class="reset-ok"></div>
     <div id="reset-form">
-      <div class="form-group" style="text-align:left"><label>Nueva contraseña</label>
+      <div class="form-group" style="text-align:left">
+        <label>Nueva contraseña</label>
         <input id="reset-new" type="password" placeholder="Mínimo 4 caracteres"/>
-        <p class="field-hint warning">🔡 Distingue entre mayúsculas y minúsculas</p></div>
-      <div class="form-group" style="text-align:left"><label>Repite la contraseña</label>
-        <input id="reset-rep" type="password" placeholder="Repite la contraseña"/></div>
+        <p class="field-hint warning">🔡 La contraseña <strong>distingue entre mayúsculas y minúsculas</strong>. Escríbela exactamente igual cada vez que entres.</p>
+      </div>
+      <div class="form-group" style="text-align:left">
+        <label>Repite la contraseña</label>
+        <input id="reset-rep" type="password" placeholder="Repite la contraseña"/>
+      </div>
       <button class="btn-auth" onclick="doResetPassword()">Guardar contraseña →</button>
     </div>
   </div>
@@ -523,11 +464,8 @@
   <header>
     <div class="header-inner">
       <div class="header-brand">
-        <div class="brand-icon">🎾</div>
-        <div>
-          <h2>Club El Real de Espartinas</h2>
-          <small>Reserva de pistas de pádel</small>
-        </div>
+        <h2>🎾 Club El Real de Espartinas</h2>
+        <small>Reserva de pistas de pádel</small>
       </div>
       <div class="header-actions">
         <div class="user-pill">
@@ -541,23 +479,19 @@
   </header>
 
   <div class="main">
-    <p class="section-label">Selecciona el día</p>
+    <p class="section-title">Selecciona el día</p>
     <div class="date-tabs" id="date-tabs"></div>
     <div class="legend">
-      <div class="legend-item"><div class="legend-dot" style="background:var(--green-l);border:1px solid rgba(34,197,94,.3)"></div><span>Disponible</span></div>
-      <div class="legend-item"><div class="legend-dot" style="background:var(--blue-l);border:1px solid rgba(96,165,250,.3)"></div><span>Tu reserva</span></div>
-      <div class="legend-item"><div class="legend-dot" style="background:rgba(255,255,255,.04);border:1px solid var(--border)"></div><span>Ocupada</span></div>
-      <div class="legend-item"><div class="legend-dot" style="background:var(--amber-l);border:1px solid rgba(251,191,36,.3)"></div><span>Turno bloqueado</span></div>
-      <div class="legend-item"><div class="legend-dot" style="background:rgba(251,191,36,.06);border:1px dashed rgba(251,191,36,.3)"></div><span>Descanso vecinos</span></div>
-      <div class="legend-item"><span style="font-size:.75rem;color:var(--dim)">🌤️ Tiempo en Espartinas · <span style="color:var(--blue)">💧% lluvia</span></span></div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--green-l);border:1.5px solid var(--green)"></div><span>Disponible</span></div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--blue-l);border:1.5px solid var(--blue)"></div><span>Tu reserva</span></div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--g100);border:1.5px solid var(--g200)"></div><span>Ocupada</span></div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--amber-l);border:1.5px solid var(--amber)"></div><span>Turno bloqueado</span></div>
+      <div class="legend-item"><div class="legend-dot" style="background:linear-gradient(135deg,#fef3c7,#fde68a);border:1.5px dashed #f59e0b"></div><span>Descanso vecinos</span></div>
+      <div class="legend-item"><span style="font-size:.8rem">🌤️ Previsión del tiempo en Espartinas · <span style="color:var(--red)">💧% = prob. lluvia</span></span></div>
     </div>
     <div class="grid-card">
       <table class="grid-table">
-        <thead><tr>
-          <th>Hora</th>
-          <th><span class="court-icon">🏸</span><span class="court-name">Pista 1</span></th>
-          <th><span class="court-icon">🏸</span><span class="court-name">Pista 2</span></th>
-        </tr></thead>
+        <thead><tr><th>Hora</th><th>🏸 Pista 1</th><th>🏸 Pista 2</th></tr></thead>
         <tbody id="grid-body">
           <tr class="loading-row"><td colspan="3"><div class="spinner"></div><p>Cargando…</p></td></tr>
         </tbody>
@@ -615,7 +549,9 @@
       <div class="info-row"><span class="info-label">Calle</span><span class="info-value" id="ad-calle">—</span></div>
       <div class="info-row"><span class="info-label">Número</span><span class="info-value" id="ad-num">—</span></div>
     </div>
-    <div class="modal-actions"><button class="btn-mok" onclick="closeModals()">Cerrar</button></div>
+    <div class="modal-actions">
+      <button class="btn-mok" onclick="closeModals()">Cerrar</button>
+    </div>
   </div>
 </div>
 
@@ -634,6 +570,8 @@
 
     <!-- CONFIG -->
     <div id="apane-config" class="admin-pane active">
+
+      <!-- INVIERNO -->
       <div class="season-section" id="winter-section">
         <div class="season-label">❄️ Horario Invierno <span class="season-badge" id="winter-active-badge" style="display:none">Activo ahora</span></div>
         <div class="config-grid">
@@ -642,15 +580,20 @@
               <option value="6">06:00</option><option value="7">07:00</option><option value="8">08:00</option>
               <option value="9">09:00</option><option value="10" selected>10:00</option><option value="11">11:00</option>
               <option value="12">12:00</option><option value="13">13:00</option><option value="14">14:00</option>
-            </select></div>
+            </select>
+          </div>
           <div class="cfg-item"><label>Minutos</label>
-            <select id="cfg-wm"><option value="0" selected>:00</option><option value="30">:30</option></select></div>
+            <select id="cfg-wm"><option value="0" selected>:00</option><option value="30">:30</option></select>
+          </div>
           <div class="cfg-item"><label>Nº turnos</label>
-            <input id="cfg-ws" type="number" min="1" max="16" value="7"/></div>
+            <input id="cfg-ws" type="number" min="1" max="16" value="7"/>
+          </div>
           <div class="cfg-item" style="align-self:end">
             <div class="preview-box" style="margin-top:0;padding:.5rem .75rem">
-              <p>Vista previa:</p><div class="preview-tags" id="prev-winter"></div>
-            </div></div>
+              <p style="margin-bottom:.25rem">Vista previa:</p>
+              <div class="preview-tags" id="prev-winter"></div>
+            </div>
+          </div>
         </div>
         <div class="season-dates-grid">
           <div class="cfg-item"><label>Empieza el día</label>
@@ -658,14 +601,15 @@
           <div class="cfg-item"><label>De mes (1-12)</label>
             <input id="cfg-winter-month" type="number" min="1" max="12" value="10" placeholder="Mes"/></div>
         </div>
-        <div class="season-dates-grid" style="margin-top:.625rem;padding-top:.625rem;border-top:1px dashed rgba(251,191,36,.3)">
+        <div class="season-dates-grid" style="margin-top:.625rem;padding-top:.625rem;border-top:1px dashed #f59e0b">
           <div class="cfg-item"><label>🌙 Descanso — desde</label>
             <select id="cfg-winter-break-start">
               <option value="0">Sin descanso</option>
               <option value="780">13:00</option><option value="810">13:30</option>
               <option value="840">14:00</option><option value="870">14:30</option>
               <option value="900">15:00</option><option value="930">15:30</option>
-            </select></div>
+            </select>
+          </div>
           <div class="cfg-item"><label>hasta</label>
             <select id="cfg-winter-break-end">
               <option value="0">Sin descanso</option>
@@ -673,10 +617,12 @@
               <option value="900">15:00</option><option value="930">15:30</option>
               <option value="960">16:00</option><option value="990">16:30</option>
               <option value="1020">17:00</option>
-            </select></div>
+            </select>
+          </div>
         </div>
       </div>
 
+      <!-- VERANO -->
       <div class="season-section summer" id="summer-section">
         <div class="season-label">☀️ Horario Verano <span class="season-badge summer-badge" id="summer-active-badge" style="display:none">Activo ahora</span></div>
         <div class="config-grid">
@@ -685,15 +631,20 @@
               <option value="6">06:00</option><option value="7">07:00</option><option value="8">08:00</option>
               <option value="9" selected>09:00</option><option value="10">10:00</option><option value="11">11:00</option>
               <option value="12">12:00</option><option value="13">13:00</option><option value="14">14:00</option>
-            </select></div>
+            </select>
+          </div>
           <div class="cfg-item"><label>Minutos</label>
-            <select id="cfg-sm"><option value="0" selected>:00</option><option value="30">:30</option></select></div>
+            <select id="cfg-sm"><option value="0" selected>:00</option><option value="30">:30</option></select>
+          </div>
           <div class="cfg-item"><label>Nº turnos</label>
-            <input id="cfg-ss" type="number" min="1" max="16" value="9"/></div>
+            <input id="cfg-ss" type="number" min="1" max="16" value="9"/>
+          </div>
           <div class="cfg-item" style="align-self:end">
-            <div class="preview-box" style="margin-top:0;padding:.5rem .75rem;background:rgba(251,191,36,.05);border-color:rgba(251,191,36,.2)">
-              <p style="color:var(--amber)">Vista previa:</p><div class="preview-tags" id="prev-summer"></div>
-            </div></div>
+            <div class="preview-box" style="margin-top:0;padding:.5rem .75rem;background:var(--amber-l)">
+              <p style="margin-bottom:.25rem;color:#92400e">Vista previa:</p>
+              <div class="preview-tags" id="prev-summer"></div>
+            </div>
+          </div>
         </div>
         <div class="season-dates-grid">
           <div class="cfg-item"><label>Empieza el día</label>
@@ -701,14 +652,15 @@
           <div class="cfg-item"><label>De mes (1-12)</label>
             <input id="cfg-summer-month" type="number" min="1" max="12" value="6" placeholder="Mes"/></div>
         </div>
-        <div class="season-dates-grid" style="margin-top:.625rem;padding-top:.625rem;border-top:1px dashed rgba(251,191,36,.3)">
+        <div class="season-dates-grid" style="margin-top:.625rem;padding-top:.625rem;border-top:1px dashed #f59e0b">
           <div class="cfg-item"><label>🌙 Descanso — desde</label>
             <select id="cfg-summer-break-start">
               <option value="0">Sin descanso</option>
               <option value="780">13:00</option><option value="810">13:30</option>
               <option value="840">14:00</option><option value="870">14:30</option>
               <option value="900">15:00</option><option value="930">15:30</option>
-            </select></div>
+            </select>
+          </div>
           <div class="cfg-item"><label>hasta</label>
             <select id="cfg-summer-break-end">
               <option value="0">Sin descanso</option>
@@ -716,7 +668,8 @@
               <option value="900">15:00</option><option value="930">15:30</option>
               <option value="960">16:00</option><option value="990">16:30</option>
               <option value="1020">17:00</option>
-            </select></div>
+            </select>
+          </div>
         </div>
       </div>
 
@@ -766,13 +719,19 @@
     <div id="apane-account" class="admin-pane">
       <div class="account-section">
         <h4>🔑 Cambiar contraseña del administrador</h4>
-        <div class="form-group"><label>Contraseña actual</label>
-          <input id="adm-cur-pass" type="password" placeholder="Contraseña actual"/></div>
-        <div class="form-group"><label>Nueva contraseña</label>
+        <div class="form-group">
+          <label>Contraseña actual</label>
+          <input id="adm-cur-pass" type="password" placeholder="Contraseña actual"/>
+        </div>
+        <div class="form-group">
+          <label>Nueva contraseña</label>
           <input id="adm-new-pass" type="password" placeholder="Mínimo 4 caracteres"/>
-          <p class="field-hint warning">🔡 Distingue entre mayúsculas y minúsculas</p></div>
-        <div class="form-group"><label>Repite la nueva contraseña</label>
-          <input id="adm-rep-pass" type="password" placeholder="Repite la nueva contraseña"/></div>
+          <p class="field-hint warning">🔡 Distingue entre mayúsculas y minúsculas</p>
+        </div>
+        <div class="form-group">
+          <label>Repite la nueva contraseña</label>
+          <input id="adm-rep-pass" type="password" placeholder="Repite la nueva contraseña"/>
+        </div>
         <p class="account-err" id="adm-pass-err"></p>
         <p class="account-ok" id="adm-pass-ok"></p>
         <div class="modal-actions" style="margin-top:.75rem">
@@ -781,15 +740,17 @@
         </div>
       </div>
     </div>
+
   </div>
 </div>
 
-<!-- ═══ MODAL: ENLACE DE RESETEO ════════════════════════════════════════ -->
+<!-- ═══ MODAL: ENLACE DE RESETEO ════════════════════════════════════════════ -->
 <div id="modal-reset-link" class="overlay">
   <div class="modal" style="max-width:440px;text-align:center">
-    <div class="modal-icon info" style="margin:0 auto 1rem">🔗</div>
+    <div class="modal-icon" style="background:#dbeafe;margin:0 auto 1rem">🔗</div>
     <h3 class="modal-title">Enlace de reseteo</h3>
-    <p class="modal-sub">Envía este enlace al vecino por WhatsApp.<br>Caduca en <strong>24 horas</strong> y es de un <strong>solo uso</strong>.</p>
+    <p class="modal-sub">Envía este enlace al vecino por WhatsApp.<br>
+      Caduca en <strong>24 horas</strong> y es de un <strong>solo uso</strong>.</p>
     <div class="reset-link-box">
       <span class="reset-link-value" id="reset-link-value">—</span>
       <span class="reset-link-note">⏱ Válido 24h · 🔒 Un solo uso · El admin nunca ve la contraseña</span>
@@ -803,7 +764,6 @@
 
 <div id="toast"></div>
 
-<script>
 <script>
 // ─── STATE ─────────────────────────────────────────────────
 const S = { token:null, user:null, currentDate:null, slots:[], reservations:[], config:null,
@@ -1766,7 +1726,6 @@ async function doResetPassword() {
     setTimeout(() => { window.location.href = '/'; }, 2500);
   } catch(e) { errEl.textContent = e.message; errEl.classList.add('show'); }
 }
-
 </script>
 </body>
 </html>
