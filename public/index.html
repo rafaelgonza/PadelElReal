@@ -57,7 +57,7 @@
 
     /* ══════════════════════════════════════ AUTH */
     #auth-screen{
-      min-height:100vh;display:none;align-items:center;justify-content:center;padding:1.5rem;
+      min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1.5rem;
       background:radial-gradient(ellipse 80% 60% at 50% -10%,rgba(34,197,94,.15) 0%,transparent 60%),var(--bg);
       position:relative;overflow:hidden}
     #auth-screen::before{
@@ -1691,25 +1691,32 @@ function showAuthScreen() {
 }
 
 (function init() {
-  // Check if this is a password reset link (?token=xxx)
-  const urlParams = new URLSearchParams(window.location.search);
-  const resetToken = urlParams.get('token');
-  if (resetToken) {
-    showResetScreen(resetToken);
-    return;
-  }
-
-  const token = localStorage.getItem('padel_token');
-  const user  = localStorage.getItem('padel_user');
-  if (token && user) {
-    try {
-      S.token = token;
-      S.user  = JSON.parse(user);
-      showApp();
+  try {
+    // Check if this is a password reset link (?token=xxx)
+    const urlParams = new URLSearchParams(window.location.search);
+    const resetToken = urlParams.get('token');
+    if (resetToken) {
+      showResetScreen(resetToken);
       return;
-    } catch {}
+    }
+
+    const token = localStorage.getItem('padel_token');
+    const user  = localStorage.getItem('padel_user');
+    if (token && user) {
+      try {
+        S.token = token;
+        S.user  = JSON.parse(user);
+        showApp();
+        return;
+      } catch {}
+    }
+    showAuthScreen();
+  } catch(err) {
+    // Fallback: siempre mostrar login si algo falla
+    console.error('Init error:', err);
+    const authEl = document.getElementById('auth-screen');
+    if (authEl) authEl.style.display = 'flex';
   }
-  showAuthScreen();
 })();
 
 // ─── RESET PASSWORD (desde enlace externo) ─────────────────────────────────
